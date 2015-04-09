@@ -1,0 +1,160 @@
+
+ += -= etc operators
+ initialize variables e.g. int x=0 , maybe even scopes 
+ set declared var to zero.
+ allow x++ for aliases as a special case.
+ x->?y or x?->y to be like  (x!=?0)->y OR x?? or ??x  as (x!=?0)  
+  
+ +/ */ &/ |/ ^/   ==/ !=/ </ >/ <=/ >=/
+ src(location) as scope
+ istype(type,x)  to check type of x
+ ?x to check for x in current scope
+ conditional break points, watchpoints
+ better type checking of structs.
+ bitfield assignment
+ better builtin commands, help
+ output formatting, duel/xodus, more general out(v)
+ duel macros/functions
+ \x and \\x
+ check array bounds
+ x->>y  x->-y x>--y
+ check cycles in --> expansion
+  ..:+ ..:-
+ print types, do so better
+
+DUEL.PIPE - make it general purpose
+------------------------------------
+see duel.pipe for some details.
+should be made general purpose, so it is easy to modify/add functions.
+many basic functions can be writted - sort, uniq, matrix, vector,
+compress, etc.
+
+Checking for cycles in --> expansion
+------------------------------------
+One can easily add code to handle head-->(next!=?head), as well as
+head-->(next!=?_). If you don't know what these do, you should RTFM again :-)
+
+You can also keep all pointers that have been expanded already,
+hence detecting any kind of cycle. However, what to do in
+such cases is debatable. Some users would like to see
+cycles terminate expansion quietly, while others will want a fatal error
+to be produced. This could be handled by an operator like x-->?y which
+would indicate that cycles are ok and expansion should terminate quietly,
+while x-->y produce an error on cycles.
+
+Another idea is to have _cyc defined inside -->, to allow the user to
+do something about cycles, e.g.  head-->(if(!_cyc) next). There are
+several ways to manage _cyc: a boolean, or equal to head; true if
+this is already a cycle, or a function cyc(next), which return true if
+next would cycle, or return next unles it would cycle, etc.
+This last one seems to handle most cases:
+head-->(cyc(left),cyc(right))	- return tree, igoring cycles
+head-->(cyc(0),left,right) 	- like head->(left,right), but mention of cyc
+				  which by itself does nothing, cause general
+				  cycle detection as errors
+as above, but left!=?_		- detect general cycles, pointer to self ok
+
+While we adding cyc(), we can also add _depth to indicate current depth,
+e.g. head-->(if(_depth<6) (left,right)) -- expand only to depth 6
+and also acceess to the current path with _path(i), _path(0)=_ and 
+_path(_depth-1)=head
+head-->(cyc(0), if(! ||/_path(.._deapth)==left) left, ...)
+		which avoids cycles "in the path"
+
+If you an strong opinion on this subject, or a better idea, lemme know!
+
+Other expansions: x->>y x->-y x>--y
+------------------------------------
+x-->y applies DFS (Depth First Search). Another useful expansion would be
+BFS (Breath First Search). It is simple to implement - y's values should
+be put on a queue instead of a stack, and the code in place has been written
+with this in mind (eval.c).
+Others will probably want a post-order or in-order search instead of preorder
+search as done by x-->y. I am not sure this is important enough to merit
+new operators, but ->- for inorder and >-- for post order are reserved.
+These, too, should be easy to implement, but it is very unclear that the
+added complexity to the language is worth it. If you really need such
+operators, lemme know.
+
+Increment count for x..y   (x..y:+z and x..y:-z)
+------------------------------------------------
+The x..y operator could be extended to support an increment or decrement
+value. This would allow 1..n to be written as 1..n:+1 so when n==0 it
+will not produce the surprising 1,0 results. 
+However, 0..10:+2 could also be written as (0..5)*2, so it is unclear
+that such operators are really needed (maybe just x..+y, x..-y to force
+the direction).
+
+
+Duel functions / print procedures
+-------------------------------------
+the command:  dl define x expr
+will define x to be duel procedure for expression expr.
+x can then be used like an alias (indeed, it will probably be kept in
+the alias table with a special value). x evaluation returns multiple 
+values. 
+There is no need parameters, since emp.x would call "x" using the implicit
+parameter "_" set as emp. the expression for x is essentially put into
+the code for the execution. Having no parameters (except implicit ones)
+make it easier to document, use etc.
+
+Such functions (macros?) are most useful for output. e.g.
+dl define empout  val_type,a, u.if(val_type==0) code*6,name else code,z
+dl emp.empout
+will produce output for 
+  struct {
+   int val_type,code ;
+   char a;
+   union { char *name ; double z ; } u 
+   } emp ;
+
+the empout procedure can be defined just once, and used to output such
+unions as needed.
+
+The next step is to call such functions automatically for output and
+for expansion. We add syntax like  dl define out(type) expr
+
+then whenever an expression of the given type is to be printed, this
+code is evaluated instead, e.g.:
+dl define out(struct emp) ...
+dl emp   	## this calls the above out code for the output.
+
+We can also expand expressions by calling the right function, e.g.
+The operator "\" calls a function to expand a specific type:
+dl define \(struct list *)  (_-->next)
+dl if(\head#i == \head#j && i<j) \head[[i,j]]
+
+instead of writing this code (find non unique elements of linked list):
+   if(head-->next#i == head-->next#j && i<j) head-->next[[i,j]]
+
+Both printing and expansion occurs automatically based on TYPE.
+It is unclear if the an array is allowed to be expanded by a pointer
+type expansion or not (i.e. is \(int *) to expand "int x[40]").
+this might require an extension to types allowing \(int [n]) which matches
+any int array and set n for the specific bound. Types could be extended
+in a similar way, e.g. \(type **) _[0..]@0
+which expands any array of pointers (e.g. argv).
+This can quickly require scope-nesting for local aliases/variables.
+
+As before, it is unclear what of these is useful. Unless people depends on
+duel heavily, and write such "output/expansion" functions for the project,
+the features are useless (who is going to use this interactively?)
+
+Regular expressions for names. $xxx and `xxx`
+----------------------------------------------
+this allows things like emp.`value_*` to return all the value_something
+fields. it is really useful with structs, especially if a grep-style hat (^)
+is supported. Obviously extends to func.rexp, to show all locals, etc,
+which will make it possible to write a  stack-trace display in duel.
+
+exact semantics (e.g. what is matched and how) unclear.
+
+
+Nicer #/
+---------
+
+hash[..1024] => #/_-->next >? 2
+
+it is probably best if #/(exp) constructed (exp) as symbolic before it
+gets the values. or maybe, yes, best is #/(e) symbolic is #/(e1..en)
+where e1 is the first return symbolc, en the last.

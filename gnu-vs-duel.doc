@@ -1,0 +1,144 @@
+GNU VS DUEL, or why DUEL is not part of the GNU project.
+
+DUEL IS PUBLIC DOMAIN SOFTWARE
+
+DUEL is public domain software. There is *no* copyright.
+Therefor you may copy it, change a few lines, remove my name,
+claim credit for it all and sell it. Feel free to do so! Of course, 
+I'd rather see people who modify the code give me credit and the 
+code for free. However, I encourage you, for the sake of society, 
+to use this code even if you can't give me credit for it (i.e. if 
+your company won't allow my name to be kept, but you want to use the 
+code to develop a new product, go ahead and delete my name!).
+
+DUEL is not under the "GNU Public License" (GPL). I disagree with 
+many of the "GNU ideas", even though I like to see public domain 
+software available. GPL software is not public domain nor "free" for 
+many reasons. If you develop code and distribute it freely, I
+urge you not to apply the GPL restrictions to it. Keep it free! 
+
+By making code "freely available", you loose almost all of your rights, 
+for all practical purposes. I am unaware of a case where someone who used 
+freely available source code in violation of the copyright notice
+has been sued. (Since such a case has probably never made it to court, 
+the legality of notices like "use this for anything but not commercially" 
+is unclear. Some lawyers believe such notices to be invalid. 
+Consider "Use this freely unless you are a black male" to realize why.)
+Besides, when you release free code but attach some "rules" to its use, 
+you only prevent honest people from using the code. 
+
+
+The rest of this file discuss the GPL. You probably won't agree with many of 
+the arguments, but even one of these is a good reason to avoid the GNU license.
+
+
+THE GNU LICENSE
+
+What is wrong with the GNU license?
+
+1) It seem to be unenforceable.
+   Many lawyers claim it isn't. There isn't really a license (you don't sign
+   anything nor negotiate), and the mention of the code as "free" means a 
+   very weak, if any, copyright protection. Since copyright law  protects 
+   the holder from monetary damages, and since the FSF doesn't want nor 
+   intend to make any money, it seems that even a ruling in their favor
+   won't mean much. Propagating the GPL seems like propagating FUD, the
+   kind that the worst and lowest commercial companies sometimes use.
+
+2) It seem no one will ever try to enforce it.
+   FSF don't have the money nor the will to try to enforce the GPL.
+   I am unaware of anyone who violates it, but I am certain there are such
+   cases. By not enforcing it, FSF most likely loose their ability to do so
+   in the future, making the license useless. Even if they went to court
+   and won, there is no way the judge would require anyone to surrender his
+   source code. They can only demand money (the amount of which is unclear,
+   since they didn't loose any). For that matter, I wonder if the GNU 
+   software was even sent to the copyright office. If it haven't, they can't
+   win any kind of case (ask a lawyer if you don't believe me. And don't
+   bother to claim code you released is copyrighted at all if you didn't 
+   file it with the copyright office).
+
+3) The license can be easily circumvented with your own smart license.
+   By making your own special license, you could give people only "diff"
+   files and ask them to apply it to original GNU code. The diff files
+   being independent code, can't be given away unless you allow it.
+   Under the same license you can also provide "installation" of this code,
+   and provide them with a binary image as a service ... While clearly 
+   against the intent of the GPL, it practically sell binaries only:
+   "We here by agree that I sell you:"
+     (a) a file of source changes, which you may use only ONCE
+	 to patch source code for GNU product x, and compile into
+	 a binary program to be used on a single machine. You must
+	 destroy the diff file and the patched gnu code immediately
+	 after it has been compiled.
+     (b) a service of applying the diff file you acquired in (a) 
+	 to a publicly available GNU code of product x. I will give you 
+	only the binary result from this service.
+
+   Lawyers could refine this, I am sure. For example, (a) might cost $100
+   and (b) another $100. A total of $200 for the bin file only. You may 
+   choose only (a), but then you must apply it on my premises, pay rent...
+   This makes (a) and (b) independent, like the 'no purchase necessary' rules.
+
+4) The license hurts people who can not use this code.
+   Many people won't use GNU products, let alone code, just to prevent
+   legal problems. In some cases companies disallow use of such code.
+   In many cases, all you really want is a few GNU functions which you
+   have learned/used while developing GNU code yourself. Yet, you can't
+   use them! You end up spending time re-implementing something you have
+   on your disk already (example: GNU pattern matching code).
+   DUEL provided me with a good example of this. While developing DUEL,
+   I spend lots of time reading GDB code. Some of this code could be useful
+   in a commercial package I am developing, but I can't use it. Morally,
+   can I look at the code while I re-implement it? What if I use the same
+   actual code, from memory? Did I infringe on the copyright? Do I have to
+   go out of my way to implement it "differently"?
+
+5) The GNU project seems to be promoted by a small group of people for
+   their own agenda. The same people use this power, knowledge and position
+   to advance their own interests in a fight against security, private
+   enterprise, patents, etc. By making your code GNUish, you are
+   helping them to advance ALL of their causes. Make sure you understand
+   what these causes are, before adding your implicit support.
+   
+6) GNU gives lawyers work!
+   Amazingly, many companies spend time and money on lawyers concerning
+   GNU and GNU-like "free" software. Lawyers are suspicious of any
+   rules or contracts that aren't standard, especially if they accompany
+   a "free" package. For example, in AT&T, you can purchase commercial
+   software in 24 hours, but to get permission to use "free" tools like GNU
+   the lawyers must check and verify the contract is "ok". This can 
+   take months (I ain't joking!)
+
+It seems the GNU project has outrun itself, and is now slowing down
+innovation. By not allowing anyone to build upon it and still make 
+any money, the GNU project sets a minimal standard that any software 
+developer must overcome, before developing improved software. As a 
+result, while the GNU project has improved the minimal software standard 
+overall, it has also reduced the development of new, better software. 
+Had the GNU code been public domain, it could have been built upon by 
+small companies, to produce better software.
+
+
+IF YOU WRITE "FREE PROGRAMS"
+
+I urge you to make your program public domain. Any honest person who
+use your code will give you proper credit anyway. The less honest people
+will use your code against your wishes either way. 
+
+If you insist on making your program copyrighted, I suggest that you either:
+
+1. Allow people to grab some parts of your source code and use it as public 
+   domain. In other words, allow people who hacked your code and got familiar
+   with it to use a few of your functions in a big in-house project without 
+   having to rewrite them from scratch (or illegally steal them!).
+
+2. Retain only the copyright notice. Demand that your copyright notice 
+   be  kept in the sources, and/or in manual pages and binary code if it is
+   distributed. This allows people to base commercial products on it,
+   but not without giving you some fame or glory.
+
+3. Use the "artistic license" provided with Perl.
+
+
+
