@@ -1,5 +1,5 @@
 /*   DUEL - A Very High Level Debugging Langauge.  */
-/*   Public domain code			           */
+/*   Public domain code                            */
 /*   Written by Michael Golan mg@cs.princeton.edu  */
 /*$Header: /tmp_mnt/n/fs/grad2/mg/duel/RCS/duel.h,v 1.4 93/01/12 21:28:47 mg Exp $*/
 

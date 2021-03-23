@@ -5,19 +5,19 @@ set prompt
 ##$Header: /tmp_mnt/n/fs/grad2/mg/duel/tsuite/RCS/tsuite.gdb,v 1.6 93/03/19 15:55:25 mg Exp $
 ##
 ## test suite for duel, can be used with duelself or gdb
-## 
+##
 file tsuite
 b 60
 b 61
 r
-## check constants 
+## check constants
 dl (1..5)*(2,(double) 2/3)
 ## declare array x, set it, search it
-dl int x[100] ; 
+dl int x[100] ;
 dl x[0..99]= -1 ;
 dl x[i:=20..40]=2+i*i ;
 dl x[20..23,38..40]
-dl x[..100] >=? 33*33 <=? 35*35 
+dl x[..100] >=? 33*33 <=? 35*35
 dl x[..100]=> ((_>=33*33) & (_<= 35*35)) ==? 1
 dl (*(x+(7..9)))++
 dl y:= &x[7] ;
@@ -30,7 +30,7 @@ dl int j ; for(j=0 ; j<100 ; j++) if(x[j]>37*37) printf("x[%d]=%d\n",j,x[j]);ffl
 dl printf("%d\n",1..5);
 ## check void type
 dl void *p
-dl p = &p 
+dl p = &p
 dl p,*p
 ## errors
 dl 1e+++3
@@ -47,12 +47,12 @@ dl s[4..8]
 dl s[6..]@0
 dl l:=#/s[0..]@0
 dl s[l-2..l]
-dl gint 
+dl gint
 dl gint++
 dl gint++
-dl --gint 
-dl gint 
-dl main.s 
+dl --gint
+dl gint
+dl main.s
 dl ++main.s
 dl main ==? main
 dl main == main
@@ -68,8 +68,8 @@ dl sizeof(emp[0])
 dl (uint)-1
 dl (uint*)(gint=gint-9)
 dl *(uint*)&gint
-dl T uint myuint ; myuint = -1 
-## some errors 
+dl T uint myuint ; myuint = -1
+## some errors
 dl frame(0).gint
 dl frame(0).(gint)
 dl frame(0).ha
@@ -87,7 +87,7 @@ dl emp[4]
 dl emp[k:=..100].a !=? k
 dl (emp[k:=..100].a !=? k)[[0]] ; emp[{k}]
 dl emp[k:=..100].if(a!=k) _
-dl emp[k:=..100].b !=? k*k 
+dl emp[k:=..100].b !=? k*k
 dl emp[k:=..100].if(b!=k*k) _,{k}*{k}
 dl emp[k:=..100]=>if(_.b!=k*k) _,{k}*{k}
 dl char s[80];
@@ -105,8 +105,8 @@ dl #/(root+0000000000000000000000000000000000000000000000000000)-->(left,right)
 ## compute min, max, check for dups, no-show
 dl root-->left[[#/root-->left-1]]->code
 dl root-->right[[#/root-->right-1]]->code
-dl int codes[11000] ; codes[..11000]=0 ; codes[root-->(left,right)->code]++ ; 
-dl codes[..11000] >? 1 
+dl int codes[11000] ; codes[..11000]=0 ; codes[root-->(left,right)->code]++ ;
+dl codes[..11000] >? 1
 dl (codes[..11000] ==? 0 )[[..10]]
 dl (..11000 => if(!codes[_]) _)[[..10]]
 ## check consistency
@@ -123,4 +123,3 @@ dl emp[0]=us
 dl emp=us
 dl us=emp
 ## the end
-

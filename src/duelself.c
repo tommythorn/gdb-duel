@@ -1,5 +1,5 @@
 /*   DUEL - A Very High Level Debugging Langauge.  */
-/*   Public domain code			           */
+/*   Public domain code                            */
 /*   Written by Michael Golan mg@cs.princeton.edu  */
 /*$Header: /tmp_mnt/n/fs/grad2/mg/duel/RCS/duelself.c,v 1.6 93/03/19 16:55:35 mg Exp $*/
 
@@ -11,9 +11,9 @@
  *
  * int gint ;
  * typedef unsigned int uint ;
- * int main() { 
- *	printf ; malloc ; 	/ * include them in bin * /
- *	char *s="main string" ; 
+ * int main() {
+ *      printf ; malloc ;       / * include them in bin * /
+ *      char *s="main string" ;
  * }
  *
  * You could link this module with your own program and call it at
@@ -23,23 +23,23 @@
  */
 
 /*
- * $Log:	duelself.c,v $
+ * $Log:        duelself.c,v $
  * Revision 1.6  93/03/19  16:55:35  mg
  * allow execution from within make
- * 
+ *
  * Revision 1.5  93/03/12  05:47:29  mg
  * *** empty log message ***
- * 
+ *
  * Revision 1.4  93/02/04  00:05:10  mg
  * avoid Header problems in self.out
- * 
+ *
  * Revision 1.3  93/01/13  16:21:40  mg
  * made sure printf is declared
- * 
+ *
  * Revision 1.2  93/01/12  21:31:01  mg
  * brought uptodate with duelgdb.c
  * cleanup and set for release
- * 
+ *
  */
 /* include system dependent stuff here */
 
@@ -94,34 +94,34 @@ PROC duel_target_func_call(tvalue *func, tvalue *parms[],
     int (*f)();
     int i ;
     if(parms_no>5) duel_fatal("too many parms");
-    if(sizeof(func->ctype->u.kid)!=sizeof(int) && 
+    if(sizeof(func->ctype->u.kid)!=sizeof(int) &&
        func->ctype->u.kid!=ctype_void ) duel_fatal("unsupported func parm");
     for(i=0 ; i<parms_no ; i++) {
-	if(parms[i]->val_kind!=VK_RVALUE || parms[i]->ctype->size!=sizeof(int))
-	    duel_fatal("unsupported paramater");
+        if(parms[i]->val_kind!=VK_RVALUE || parms[i]->ctype->size!=sizeof(int))
+            duel_fatal("unsupported paramater");
     }
     f=(int (*)()) func->u.lvalue ;
     switch(parms_no) {
       case 0:
-	rval->u.rval_int= (*f)();
+        rval->u.rval_int= (*f)();
       break ;
       case 1:
-	rval->u.rval_int= (*f)(parms[0]->u.rval_int);
+        rval->u.rval_int= (*f)(parms[0]->u.rval_int);
       break ;
       case 2:
-	rval->u.rval_int= (*f)(parms[0]->u.rval_int,parms[1]->u.rval_int);
+        rval->u.rval_int= (*f)(parms[0]->u.rval_int,parms[1]->u.rval_int);
       break ;
       case 3:
-	rval->u.rval_int= (*f)(parms[0]->u.rval_int,parms[1]->u.rval_int,
-	      parms[2]->u.rval_int);
+        rval->u.rval_int= (*f)(parms[0]->u.rval_int,parms[1]->u.rval_int,
+              parms[2]->u.rval_int);
       break ;
       case 4:
-	rval->u.rval_int= (*f)(parms[0]->u.rval_int,parms[1]->u.rval_int,
-	      parms[2]->u.rval_int,parms[3]->u.rval_int);
+        rval->u.rval_int= (*f)(parms[0]->u.rval_int,parms[1]->u.rval_int,
+              parms[2]->u.rval_int,parms[3]->u.rval_int);
       break ;
       case 5:
-	rval->u.rval_int= (*f)(parms[0]->u.rval_int,parms[1]->u.rval_int,
-	      parms[2]->u.rval_int,parms[3]->u.rval_int,parms[4]->u.rval_int);
+        rval->u.rval_int= (*f)(parms[0]->u.rval_int,parms[1]->u.rval_int,
+              parms[2]->u.rval_int,parms[3]->u.rval_int,parms[4]->u.rval_int);
       break ;
     }
     rval->val_kind=VK_RVALUE ;
@@ -132,8 +132,8 @@ PROC duel_target_func_call(tvalue *func, tvalue *parms[],
  * recognize main.s, gint, malloc, printf
  */
 
-int gint ;	/* global variable recognized */
-char **main_s ;	/* point to main's 's' */
+int gint ;      /* global variable recognized */
+char **main_s ; /* point to main's 's' */
 
 FUNC bool duel_get_target_variable(char *name, int frame_no, tvalue *v)
 {
@@ -192,14 +192,14 @@ FUNC tctype* duel_get_target_enum_tag(char *name)   { return 0 ; }
 int main(int argc,char **argv)
 {
    char *s="main string" ;
-   main_s = &s ;		/* put s into the "symbol tbl" */
+   main_s = &s ;                /* put s into the "symbol tbl" */
 
    while(1) {
        char in[120] ;
        gets(in);
        if(feof(stdin)) break ;
-	/* output & input are RCS'ed. avoid $Header in self.out, which is
-	 * the input header, which RCS fix... which create mis matches */
+        /* output & input are RCS'ed. avoid $Header in self.out, which is
+         * the input header, which RCS fix... which create mis matches */
        if(strncmp(in,"## $Header",10)==0) continue ;
        printf("dl> %s\n",in);
        if(in[0]==0 || in[0]=='#' && in[1]=='#') continue ;  /* comments */

@@ -1,13 +1,13 @@
 #!/usr/local/bin/perl
-# perl script opened as a pipe by duel 
+# perl script opened as a pipe by duel
 #
 # duel(gdb), fork this program and feed it as stdin, the output from
-# evaluating expressions. the input is 
-# $$$START: expr	where expr is the expression being evaluted
-# $$$DONE		end of results
-# $$$ABORT		end of results due to error or interrupt
-# $$$SYM: s		symbolic output 's'
-# $$$VAL: v		value for previous symbolic output
+# evaluating expressions. the input is
+# $$$START: expr        where expr is the expression being evaluted
+# $$$DONE               end of results
+# $$$ABORT              end of results due to error or interrupt
+# $$$SYM: s             symbolic output 's'
+# $$$VAL: v             value for previous symbolic output
 #
 # the output from this program is fed back into duel, which simply display
 # it. After DONE/ABORT, duel wait for a $$$DONE to get back, so it can
@@ -19,28 +19,28 @@
 # is provide all hex/ all decimal display of integers (|>hex and |>dec),
 # and provide "smart" output, on the same line, when the symbolic output
 # is the same as the values.
-# 
+#
 # Some examples of what can be done here:
-# |> sort		-- will sort the output 
-# |> sort?		-- display a message if it was/wasnt sorted
-# |> uniq		-- display only uniq values in output
-# |> uniq?		-- display message if all output was uniq.
-# |> vals		-- only display vals, ignore symbolic
-# |> syms		-- only display symbolics, ignore vals
-# |> matrix		-- Attempt to display in a matrix format
-# |> compress		-- compress into single lines, eg
-#			   x[i].val=1\n x[i].name="me"\n
-#			   becomes: x[i] = { val=1, name="me" }
-# |> vector		-- attempt to display as vector, eg
-#			   x[1]=5\bx[4]=3\nx[9]=2\nx[12]=8\n  becomes:
-#			   i     1  4  9  12
-#			   x[i]  5  3  2   8
-# |> smart		-- try to figure out one of the above formats...
-# |> plotxy		-- plot (sym,val) using xgraph. can convert x[5]
-#			   symbol into '5' for the x-coord, etc.
-# |> stack		-- output of frame(..frames_no).`*`, 
-#			   which hasnt been implemented yet (* is regex),
-#			   to be formatted as a stack trace...
+# |> sort               -- will sort the output
+# |> sort?              -- display a message if it was/wasnt sorted
+# |> uniq               -- display only uniq values in output
+# |> uniq?              -- display message if all output was uniq.
+# |> vals               -- only display vals, ignore symbolic
+# |> syms               -- only display symbolics, ignore vals
+# |> matrix             -- Attempt to display in a matrix format
+# |> compress           -- compress into single lines, eg
+#                          x[i].val=1\n x[i].name="me"\n
+#                          becomes: x[i] = { val=1, name="me" }
+# |> vector             -- attempt to display as vector, eg
+#                          x[1]=5\bx[4]=3\nx[9]=2\nx[12]=8\n  becomes:
+#                          i     1  4  9  12
+#                          x[i]  5  3  2   8
+# |> smart              -- try to figure out one of the above formats...
+# |> plotxy             -- plot (sym,val) using xgraph. can convert x[5]
+#                          symbol into '5' for the x-coord, etc.
+# |> stack              -- output of frame(..frames_no).`*`,
+#                          which hasnt been implemented yet (* is regex),
+#                          to be formatted as a stack trace...
 #
 # the code below is very simple. A better organization will support
 # adding "functions" (commands) and specify for each command if the
@@ -49,7 +49,7 @@
 # the specific line it was given on, what flags it set/reset, etc.
 
 
-$|=1 ;		# flush output on every write to the pipe
+$|=1 ;          # flush output on every write to the pipe
 
 %cmds = ("norm",1,"smart",1,"dec",1,"hex",1) ;
 $smart=0;
@@ -58,27 +58,27 @@ $base=0 ;
 while(<>) {
   chop; study ;
   if(/^\$\$\$START: /) {
-    if(/\|\>\s*([^"']*)$/) {		# |> pipe-command 
-	$_ = $1 ;
-	s/\s+$// ;			# clean trailing spaces
-	if($cmds{$_}) { 
-		printf "Pipe command '$_'\n" ;
-		$smart=0 if /norm/ ;
-		$smart=1 if /smart/ ;
-		$base=0  if /norm/ ;
-		$base=10 if /dec/ ;
-		$base=16 if /hex/ ;
-	}
-	else {  printf "BAD PIP COMMAND '$_'\n" ; }
+    if(/\|\>\s*([^"']*)$/) {            # |> pipe-command
+        $_ = $1 ;
+        s/\s+$// ;                      # clean trailing spaces
+        if($cmds{$_}) {
+                printf "Pipe command '$_'\n" ;
+                $smart=0 if /norm/ ;
+                $smart=1 if /smart/ ;
+                $base=0  if /norm/ ;
+                $base=10 if /dec/ ;
+                $base=16 if /hex/ ;
+        }
+        else {  printf "BAD PIP COMMAND '$_'\n" ; }
     }
     $same=0 ;
   }
   elsif(/^\$\$\$DONE$/) {
-    print "\n" if $same ;	# go to next line if not on same 
+    print "\n" if $same ;       # go to next line if not on same
     print "\$\$\$DONE\n" ;
   }
   elsif(/^\$\$\$ABORT$/) {
-    print "\n" if $same ;	# go to next line if not on same 
+    print "\n" if $same ;       # go to next line if not on same
     print "\$\$\$DONE\n" ;
   }
   elsif(/^\$\$\$SYM: (.*)$/) {
@@ -86,19 +86,19 @@ while(<>) {
   }
   elsif(/^\$\$\$VAL: (.*)$/) {
     $_ = $val = $1 ;
-    $_ = oct 			if($base==10 && /^0x[0-9a-z]*$/) ;
+    $_ = oct                    if($base==10 && /^0x[0-9a-z]*$/) ;
     $_ = sprintf("0x%2.2x",$_)  if($base==16 && /^[1-9]\d*$/) ;
-    if($smart && ( $sym eq $_ || $sym eq $val)) { 
-	$sz= 3 + length ;
-	if($same+$sz > 75) { print "\n" ; $same=0 ; }
+    if($smart && ( $sym eq $_ || $sym eq $val)) {
+        $sz= 3 + length ;
+        if($same+$sz > 75) { print "\n" ; $same=0 ; }
         $same+=$sz ;
-	print "$_,  " ;
+        print "$_,  " ;
     }
     else {
-	print "\n" if $same ;	# go to next line if not on same 
-	if($sym == $val) { print "$_\n" ; }
-	else { print "$sym  =  $_\n" ; }
-	$same=0 ;
+        print "\n" if $same ;   # go to next line if not on same
+        if($sym == $val) { print "$_\n" ; }
+        else { print "$sym  =  $_\n" ; }
+        $same=0 ;
     }
   }
   else {

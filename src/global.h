@@ -1,5 +1,5 @@
 /*   DUEL - A Very High Level Debugging Langauge.  */
-/*   Public domain code			           */
+/*   Public domain code                            */
 /*   Written by Michael Golan mg@cs.princeton.edu  */
 /*$Header: /tmp_mnt/n/fs/grad2/mg/duel/RCS/global.h,v 1.12 93/03/12 05:50:35 mg Exp $*/
 
@@ -8,41 +8,41 @@
  */
 
 /*
- * $Log:	global.h,v $
+ * $Log:        global.h,v $
  * Revision 1.12  93/03/12  05:50:35  mg
  * uses tuint instead of uint, etc.
- * 
+ *
  * Revision 1.11  93/02/27  06:03:26  mg
  * added HP9000 support by not defining uint etc
  * clean annoying enum {x,y,} warnings
- * 
+ *
  * Revision 1.10  93/02/03  21:49:32  mg
  * support "signed char"
- * 
+ *
  * Revision 1.9  93/01/12  21:52:11  mg
  * cleanup and set for release
- * 
+ *
  * Revision 1.8  93/01/07  00:10:53  mg
  * macros for func ptr auto-convert
- * 
+ *
  * Revision 1.7  93/01/03  07:30:23  mg
  * *** empty log message ***
- * 
+ *
  * Revision 1.6  92/12/24  23:49:25  mg
  * *** empty log message ***
- * 
+ *
  * Revision 1.5  92/10/19  15:07:58  mg
  * fvalue added (not ready yet), svalues dropped
- * 
+ *
  * Revision 1.4  92/10/14  02:05:37  mg
  * misc
- * 
+ *
  * Revision 1.3  92/09/16  11:11:54  mg
  * add builtin ctype_charptr
- * 
+ *
  * Revision 1.2  92/09/15  05:47:49  mg
  * some ops added
- * 
+ *
  */
 
 
@@ -83,7 +83,7 @@ typedef int bool ;             /* suppose to be just 0,1 */
   * aborted because on an internal duel error.
   */
 
-#define duel_assert(x) 	  assert(x)
+#define duel_assert(x)    assert(x)
 #define duel_bzero(x,y)   memset(x,0,y)
 #define duel_bcopy(x,y,s) memcpy(x,y,s)
 
@@ -103,7 +103,7 @@ typedef int bool ;             /* suppose to be just 0,1 */
  2. symbolic expression which describe the computation
     meaning: keep the parentethis. in the expression a<<(3+b) (even if not needed!)
  3. A type & value
- 
+
  Values:
  Values are always a fixed length area of bytes; Any C type is like that.
 **************/
@@ -143,7 +143,7 @@ typedef int bool ;             /* suppose to be just 0,1 */
 
 typedef enum {       /* 'C' Type atomic primitive Kinds (CTK_) */
    CTK_VOID=0,       /* void type   'void'     */
-   CTK_CHAR=1,       /* primitive types        */     
+   CTK_CHAR=1,       /* primitive types        */
    CTK_SCHAR=2,      /* signed char (ansi c) */
    CTK_UCHAR=3,      /* note order is used in some macros */
    CTK_SHORT=4,
@@ -162,16 +162,16 @@ typedef enum {       /* 'C' Type atomic primitive Kinds (CTK_) */
    CTK_ENUM=17          /* enum type   'enum{}'   */
  } tctype_kind ;
 
-typedef struct {		/* a field (of struct) info */
-  char *name ;			/* field name */ 
-  struct sctype *ctype ;	/* field type */
-  int bitpos, bitlen ;		/* for bit fields only */
+typedef struct {                /* a field (of struct) info */
+  char *name ;                  /* field name */
+  struct sctype *ctype ;        /* field type */
+  int bitpos, bitlen ;          /* for bit fields only */
 } tctype_field ;
 
-typedef struct {		/* an enumerator (constant of an enum)  info */
-  char *name ;			/* enumerator name */
-  int val ;			/* value assigned to the name */
-				/* question: ansi-C say cosnt fit in int?*/
+typedef struct {                /* an enumerator (constant of an enum)  info */
+  char *name ;                  /* enumerator name */
+  int val ;                     /* value assigned to the name */
+                                /* question: ansi-C say cosnt fit in int?*/
 } tctype_enumerator ;
 
 
@@ -188,8 +188,8 @@ typedef struct sctype {       /* a 'C' type description  */
     struct {
        tctype_kind real_type_kind ; /* the type used for storage of the enum */
        int enumerators_no ;
-       tctype_enumerator *enumerators ;	/* enum's type enumerators list */
-    } e; 
+       tctype_enumerator *enumerators ; /* enum's type enumerators list */
+    } e;
    } u ;
  } tctype ;
 
@@ -198,15 +198,15 @@ typedef struct sctype {       /* a 'C' type description  */
   these are initialized at run type to point to the basic C types.
   basic types are never created again, e.g. pointer comparison with
   these is sufficient to check type equality.
-  the voidptr is (void*) which is a basic type (what zero is converted 
+  the voidptr is (void*) which is a basic type (what zero is converted
   to when it is a pointer).
   ptrdiff_t and size_t are actually pointing to their actualy types,
   ie. normally point to ctype_int.
  ****/
 
-DEF tctype *ctype_int,  *ctype_uint, *ctype_short, *ctype_ushort, 
-           *ctype_char, *ctype_schar, *ctype_uchar,  
-	   *ctype_long, *ctype_ulong,
+DEF tctype *ctype_int,  *ctype_uint, *ctype_short, *ctype_ushort,
+           *ctype_char, *ctype_schar, *ctype_uchar,
+           *ctype_long, *ctype_ulong,
            *ctype_float, *ctype_double,
            *ctype_void, *ctype_charptr,
            *ctype_voidptr,*ctype_ptrdiff_t,*ctype_size_t ;
@@ -215,14 +215,14 @@ DEF tctype *ctype_int,  *ctype_uint, *ctype_short, *ctype_ushort,
 
 /** tell if type is a struct or union */
 #define ctype_kind_struct_like(t) ((t)->type_kind==CTK_STRUCT || \
-				   (t)->type_kind==CTK_UNION)
+                                   (t)->type_kind==CTK_UNION)
 
 /** tell if type is a pointer or can be made one (array, func) */
 #define ctype_kind_ptr_like(t)   ((t)->type_kind==CTK_PTR || \
                          (t)->type_kind==CTK_ARRAY || (t)->type_kind==CTK_FUNC)
 /* tell if type is numeric */
 #define ctype_kind_numeric(t) ((t)->type_kind>=CTK_CHAR && \
-                     (t)->type_kind<=CTK_DOUBLE || (t)->type_kind==CTK_ENUM) 
+                     (t)->type_kind<=CTK_DOUBLE || (t)->type_kind==CTK_ENUM)
 
 /* tell if type is integral */
 #define ctype_kind_integral(t) ((t)->type_kind>=CTK_CHAR && \
@@ -234,11 +234,11 @@ DEF tctype *ctype_int,  *ctype_uint, *ctype_short, *ctype_ushort,
 /* tell if type is a "base" ie can't have kids */
 
 #define ctype_kind_base(t) ((t)->type_kind>=CTK_VOID && \
-			    (t)->type_kind<=CTK_DOUBLE)
+                            (t)->type_kind<=CTK_DOUBLE)
 
 /* tell if a type is a function pointer or like a func ptr (ie a func!) */
 #define ctype_kind_func_ptr_like(t) ((t)->type_kind==CTK_FUNC || \
-		    (t)->type_kind==CTK_PTR && t->u.kid->type_kind==CTK_FUNC)
+                    (t)->type_kind==CTK_PTR && t->u.kid->type_kind==CTK_FUNC)
 
 
 /***** VALUES
@@ -264,25 +264,25 @@ DEF tctype *ctype_int,  *ctype_uint, *ctype_short, *ctype_ushort,
 #define VALUE_MAX_CONST_SIZE        8
 #define VALUE_MAX_SYMBOLIC_SIZE     128
 
-typedef int tptrsize_int ;    	/* type so that 
-				   tptrsize x; char *p ;
-				   p == (char*) (tptrsize) p
-				 */
+typedef int tptrsize_int ;      /* type so that
+                                   tptrsize x; char *p ;
+                                   p == (char*) (tptrsize) p
+                                 */
 
   /* type that represent a target address space location.  */
 
 typedef char* ttarget_ptr ; /* pointer to target's address */
 
 typedef struct {
-    ttarget_ptr lvalue ;	/* pointer to target's location of struct*/
-    int bitpos,bitlen ;		/* as specified in the field info of stuct*/
+    ttarget_ptr lvalue ;        /* pointer to target's location of struct*/
+    int bitpos,bitlen ;         /* as specified in the field info of stuct*/
  } tbvalue_info ;
 
 typedef enum {
   VK_RVALUE,      /* this value represent a constant, in the rval_ union */
   VK_LVALUE,      /* this value represent a left-value. address in lvalue*/
-  VK_BVALUE,	  /* a bit-field lvalue, given as point and bitpos/bitlen*/
-  VK_FVALUE	  /* a frame, fvalue contains it number */
+  VK_BVALUE,      /* a bit-field lvalue, given as point and bitpos/bitlen*/
+  VK_FVALUE       /* a frame, fvalue contains it number */
  } tval_kind ;
 
 typedef struct {
@@ -291,7 +291,7 @@ typedef struct {
    union {
       ttarget_ptr lvalue ; /* location in target of the value */
       tbvalue_info bvalue ; /* location in target of a bitfield */
-      int 	   fvalue ; /* a frame number (0 = top of stack) */
+      int          fvalue ; /* a frame number (0 = top of stack) */
       char    rval_char ;
       tschar  rval_schar ;
       tuchar  rval_uchar ;
@@ -305,7 +305,7 @@ typedef struct {
       double  rval_double ;
       ttarget_ptr rval_ptr ;
       ptrdiff_t rval_ptrdiff_t ; /* Synonyms to one of the above fields! */
-      size_t	rval_size_t ;	 /* normally these are simply = rval_int */
+      size_t    rval_size_t ;    /* normally these are simply = rval_int */
    } u ;
    char symb_val[VALUE_MAX_SYMBOLIC_SIZE];
  }  tvalue ;
@@ -316,7 +316,7 @@ typedef struct sval_lcell {    /* a cell on a linked-list containing a tvalue*/
     struct sval_lcell *next ;
  } tval_lcell ;
 
-typedef struct {	       /* a linked list of tvalue's */
+typedef struct {               /* a linked list of tvalue's */
     tval_lcell *head ;
     tval_lcell *tail ;
 } tval_list ;
@@ -380,7 +380,7 @@ typedef enum {          /* the kind of the opcode, 'OPK_' = OPcode Kind */
    OPK_BIN        =3,   /* regular binary operator                      */
    OPK_SBIN       =4,   /* special binary operator                      */
    OPK_TRI        =5,   /* trinary (eg ?:) operator                     */
-   OPK_QUAD	  =6,   /* quad (e.g.for(;;)) operator			*/
+   OPK_QUAD       =6,   /* quad (e.g.for(;;)) operator                  */
    OPK_ASSIGN     =7,   /* assignment ie =, +=, -= etc                  */
    OPK_FUNC       =8,   /* function call. 2nd kid made of ',' kids for parms */
    OPK_CAST       =9,   /* type cast.  2nd kid convert to type in 1st kid */
@@ -409,7 +409,7 @@ typedef enum {           /* the kind of node        */
  * the op, kids or any eval stuff!). However, only few nodes (less than 100?)
  * are expected to be in memory at any time (how complex can a user
  * expression be?). Hence, for clarity, no unions where used.
- * 
+ *
  * All nodes have kids in the typical way. the opcode OPK_FUNC node is tricky:
  * see parsing - the commas are handled as operators and not as part of the
  * syntax. when a func call is evaluated, the top comma nodes are used to
@@ -417,28 +417,28 @@ typedef enum {           /* the kind of node        */
  * with variable num of kids, which would force the kids[] to be malloc etc.)
  */
 
-typedef struct snode {       	/* a single node on an expression tree     */
-   tnode_kind node_kind ;    	/* what kind of note this is               */
-				/* NK_OP node info: op_kind,op,kids	   */
+typedef struct snode {          /* a single node on an expression tree     */
+   tnode_kind node_kind ;       /* what kind of note this is               */
+                                /* NK_OP node info: op_kind,op,kids        */
    int src_pos ;           /* starting source code location (op etc)  */
-   top_kind op_kind ;		/* opcode type (unary,bin etc)   */
-   topcode op ;			/* actual opcode: '-' for both unary&bin '-'*/
-   struct snode *kids[NODE_MAX_KIDS] ; 	 /* pointers to node's kids     */
-   tvalue cnst ;		/* NK_CONST info - constant value	*/
-   char *name ;			/* NK_NAME  info - variable name        */
-   tctype *ctype ;		/* NK_CTYPE info - a type   		*/
+   top_kind op_kind ;           /* opcode type (unary,bin etc)   */
+   topcode op ;                 /* actual opcode: '-' for both unary&bin '-'*/
+   struct snode *kids[NODE_MAX_KIDS] ;   /* pointers to node's kids     */
+   tvalue cnst ;                /* NK_CONST info - constant value       */
+   char *name ;                 /* NK_NAME  info - variable name        */
+   tctype *ctype ;              /* NK_CTYPE info - a type               */
 
-   struct {			/* information used during node evaluation   */
-       int level ;		/* evaluation level (0=none, 1=left in x etc)*/
-       tvalue  v1,v2 ;		/* keep last computed operands, etc          */
-       tval_list vlist ;	/* value list for node (used in --> etc ops) */
-       int counter ;		/* used for counting 		*/
-   } eval ;		
+   struct {                     /* information used during node evaluation   */
+       int level ;              /* evaluation level (0=none, 1=left in x etc)*/
+       tvalue  v1,v2 ;          /* keep last computed operands, etc          */
+       tval_list vlist ;        /* value list for node (used in --> etc ops) */
+       int counter ;            /* used for counting            */
+   } eval ;
  } tnode ;
 
 
-DEF bool duel_debug ;	   		/* debugging duel-itself mode   */
-DEF bool duel_output_pipe_style ;	/* pipe-style output of values  */
+DEF bool duel_debug ;                   /* debugging duel-itself mode   */
+DEF bool duel_output_pipe_style ;       /* pipe-style output of values  */
 
 /* this things are machine dependent stuff */
 

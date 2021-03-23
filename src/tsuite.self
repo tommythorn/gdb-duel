@@ -5,18 +5,18 @@
 
 ##
 ## test suite for duel, can be used with duelself or gdb
-## 
+##
 
-## check constants 
+## check constants
 (1..5)*(2,(double) 2/3)
 
 ## declare array x, set it, search it
 
-int x[100] ; 
+int x[100] ;
 x[0..99]= -1 ;
 x[i:=20..40]=2+i*i ;
 x[20..23,38..40]
-x[..100] >=? 33*33 <=? 35*35 
+x[..100] >=? 33*33 <=? 35*35
 x[..100]=> ((_>=33*33) & (_<= 35*35)) ==? 1
 x
 x+5
@@ -35,7 +35,7 @@ printf("%d, ",1..5); printf("\n");
 
 ## check void type
 void *p
-p = &p 
+p = &p
 p,*p
 
 ## errors
@@ -59,12 +59,12 @@ s[5..]@0
 l:=#/s[0..]@0
 s[l-2..l]
 
-gint 
+gint
 gint++
 gint++
---gint 
-gint 
-main.s 
+--gint
+gint
+main.s
 main.s++
 main.s++
 
@@ -81,7 +81,7 @@ frame(0).gint
 ## but when we eval (expr) under frame 0 scope, we find it ok.
 frame(0).(gint)
 
-T uint myuint ; myuint = -1 
+T uint myuint ; myuint = -1
 
 sizeof(int)
 sizeof(long)
@@ -89,9 +89,9 @@ sizeof(int *)
 sizeof(signed char*)
 sizeof()
 sizeof(gint)
-sizeof gint 
+sizeof gint
 sizeof gint+1
-## some errors 
+## some errors
 
 main == main
 main == printf
@@ -104,8 +104,6 @@ T int x
 int x
 uint y
 T uint y = 5
-T uint y 
+T uint y
 
 ## the end
-
-

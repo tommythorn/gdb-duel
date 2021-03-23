@@ -6,13 +6,13 @@ Entry points and modules
 --------------------------
 duel_eval_and_parse is entry point into duel, in duel.c
 duel_parse in parse.y does all parsing
-duel_eval  in eval.c makes the evaluation 
+duel_eval  in eval.c makes the evaluation
 evalop.c contains low-level evaluation
 misc.c   contains misc stuff
 types.c  type create/manage
 output.c all output goes thru duel_printf
 output2.c same as output, but support sending eval output to a pipe,
-	  like the duel.pipe perl script.
+          like the duel.pipe perl script.
 print.c  all output of values is done here
 eval.c   high level evaluation code (generators)
 evalops.c low level evaluation code (operators)
@@ -20,7 +20,7 @@ error.c   handle erros, display error info "nicely"
 
 start reading the code from duel.c, then global.h, then eval.c.
 eval.c is hairy, especially the state-keeping code. The goto's are
-intentional, they convey control better than other constructs. 
+intentional, they convey control better than other constructs.
 
 Types
 ------
@@ -37,7 +37,7 @@ is someone implements modifying a bitfield. and there is an FVALUE, which
 is just stored in u.rval_int but has the special value type (it was either
 this or add a new TYPE, i preferred a new value).
 Note the there is no "register" type support. You must read register variables
-as rvalues (duelgdb.c does that). I don't think it is essential, since 
+as rvalues (duelgdb.c does that). I don't think it is essential, since
 gdb can be used directly to modify such values (this might be a
 problem in watchpoint/cond.breaks however). Also cc -g don't usually keep
 stuff in registers. We could add "SVALUE" for these.
@@ -45,11 +45,11 @@ Bitfields are a pain, but bvalue is really needed, eg for x[..100].bitfield=0
 
 Memory allocation
 -----------------
-go through duel_malloc/duel_free. 
+go through duel_malloc/duel_free.
 Memory is allocated only for (a) a new node, while parsing, (b) a value pushed
 on stack for x-->y operator (c) duel aliases.
 It is always safe to call duel_free_nodes  which free everything except
-for aliases. 
+for aliases.
 Memory spill can occur in asynchronous interrupts (^C), but they at most
 reflect items moved from one list to another. This isn't too bad.
 
@@ -65,20 +65,20 @@ using duel_free_nodes.
 
 Parsing
 --------
-yacc is pretty weak, especially when I tried complex ops like x\y#z 
+yacc is pretty weak, especially when I tried complex ops like x\y#z
 (as a single, 3 val op!). I have up on such things and the syntax is
 pretty clean. Things to watch for are the semicolon nonsense,
 especially with optional-expressions (as in for(a;b;c);), the T hack
 for user types (only fix is to delay decision on (x)(y) till runtime
-or make clearer rules (consider   something; (x)(y), do you parse x as a type 
+or make clearer rules (consider   something; (x)(y), do you parse x as a type
 and ignore the possible x:=printf in "something", etc), and the use of ","
 regular op and nodes for function parameters (the parser knows only about
 a single parameter, an exp!).
 
 Search ops
 -----------
-Straight forward stacking in dfs_... in eval.c 
-Note things are put in reversed, so root-->(left,right) does what you 
+Straight forward stacking in dfs_... in eval.c
+Note things are put in reversed, so root-->(left,right) does what you
 expect. Also linked-lists could be greatly optimized.
 The functionality for ->> (BFS) is already in, all you need is to
 make the stack into a queue by pushing from the other side (really append)
@@ -87,7 +87,7 @@ Multi-expressions
 --------------------
 As far as I know, you could save root (in duel.h) and use it to evaluate
 as often as needed (e.g for breakpoints/watchpoints), the internals
-of the nodes hold all eval info. You must reset the expression 
+of the nodes hold all eval info. You must reset the expression
 with eval_stop, if u dont eval it to the last value. Also make sure you
 cleanup the dot stack. Aliases (in misc.c) could become scoped, of course.
 
@@ -112,18 +112,17 @@ typical. Watch out for recursive struct pointers (the hash table handles
 these problems), and for partial types, e.g. pointer to struct which
 contains no fields (size zero!).
 
-You can return a BVALUE an LVALUE (preferred) or an RVALUE for a name 
+You can return a BVALUE an LVALUE (preferred) or an RVALUE for a name
 lookup. use RVALUE for names found in registers, and return the actual
-value. 
+value.
 
-if a frame number is given for symbol lookup, only local variables 
+if a frame number is given for symbol lookup, only local variables
 allocated in that frame should be returned. (else return none. don't
 return a global if it exist with the same name, this will make the dot
-stack compute things wrong). 
+stack compute things wrong).
 
-Node that this doesnt help with scoping problems (for duel)- e.g. 
+Node that this doesnt help with scoping problems (for duel)- e.g.
 you can't do myfunc.x if x is a static variable in myfunc. There needs to
 be a more complex & general way in the language to specify this (i.e.
 specify a source location in which the variable is visible, AND a frame
 to use if the value is kept on a frame)  frame(n).(scope(file,line).x)?
-

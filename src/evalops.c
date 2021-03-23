@@ -7,48 +7,48 @@
  */
 
 /*
- * $Log:	evalops.c,v $
+ * $Log:        evalops.c,v $
  * Revision 1.14  93/03/19  15:40:17  mg
  * fixed bug long symbolics handling
- * 
+ *
  * Revision 1.13  93/03/12  05:50:01  mg
  * uses tuint instead of uint, etc.
- * 
+ *
  * Revision 1.12  93/02/26  05:00:13  mg
  * fixed void pointers compare. ctype_voidptr is not unique!
- * 
+ *
  * Revision 1.11  93/02/04  02:09:55  mg
  * typo
- * 
+ *
  * Revision 1.10  93/02/04  01:24:51  mg
  * better error reports for "="
- * 
+ *
  * Revision 1.9  93/02/03  21:47:43  mg
  * support "signed char"
- * 
+ *
  * Revision 1.8  93/01/12  21:51:29  mg
  * cleanup and set for release
- * 
+ *
  * Revision 1.7  93/01/07  00:10:51  mg
  * auto convert func to &func
  * find a frame for a func
- * 
- * 
+ *
+ *
  * Revision 1.6  93/01/03  07:30:02  mg
  * function calls, error reporting, printing.
- * 
+ *
  * Revision 1.5  92/12/24  23:34:47  mg
  * frames support
- * 
+ *
  * Revision 1.4  92/10/19  15:07:46  mg
  * fvalue added (not ready yet), svalues dropped
- * 
+ *
  * Revision 1.3  92/10/14  02:05:10  mg
  * add print/{x} support
- * 
+ *
  * Revision 1.2  92/09/15  05:48:57  mg
  * support '..' new formats
- * 
+ *
  */
 
 #include "duel.h"
@@ -79,9 +79,9 @@
  get_integral_val- retrieve rvalue, making sure it is an integer
  get_int_val     - retrieve rvalue, make sure it's an integer, return int val
  get_pointer_val - retrieve rvalue, make sure it's a pointer.
- ****************************************************************************/ 
+ ****************************************************************************/
 
-/* give the storage-type kind of a given type. 
+/* give the storage-type kind of a given type.
  * this is the same type-kind as the type itslef, except in the case of enums
  * where the type-kind of the storage will be CTK_INT etc (integral type)
  * the storage type kind is set when the enum is created.
@@ -93,7 +93,7 @@ LFUNC tctype_kind get_storage_type_kind(tctype *t)
     return t->u.e.real_type_kind ;
 }
 
-/* try_get_rvalue -- make an rvalue of v. if v is already an rvalue, 
+/* try_get_rvalue -- make an rvalue of v. if v is already an rvalue,
  * nothing is done. Else v is an b/lvalue, so its rvalue is fetched.
  * special care:
  * (1) Enums are fetched as int of same size. type stay enum!
@@ -111,7 +111,7 @@ FUNC duel_try_get_rvalue(tvalue *v,char *op)
    int n ;
    bool ok;
    if(v->val_kind == VK_RVALUE) return TRUE;
-   if(v->val_kind == VK_FVALUE) 
+   if(v->val_kind == VK_FVALUE)
        duel_op_error("illegal type 'frame' for operand x of '%s'",op,v,0);
    switch(get_storage_type_kind(v->ctype)) {
       case CTK_CHAR:    p= &v->u.rval_char   ; n=sizeof(char)         ;break ;
@@ -131,25 +131,25 @@ FUNC duel_try_get_rvalue(tvalue *v,char *op)
                  v->val_kind=VK_RVALUE ;
                  v->ctype=duel_mkctype_ptr(v->ctype->u.kid) ;
                  v->u.rval_ptr=v->u.lvalue ;
-                 return TRUE;   
+                 return TRUE;
       case CTK_FUNC:   /* makes it a pointer to a func*/
                  duel_assert(v->val_kind==VK_LVALUE); /* duel exp rules */
                  v->val_kind=VK_RVALUE ;
                  v->ctype=duel_mkctype_ptr(v->ctype) ;
                  v->u.rval_ptr=v->u.lvalue ;
-                 return TRUE;   
+                 return TRUE;
 
       case CTK_STRUCT: /* can't have an rval from struct? */
-      case CTK_UNION:  
+      case CTK_UNION:
       /* enums were eliminated above */
       default: duel_assert(0);
    }
    if(v->val_kind == VK_BVALUE) {        /* bitfield: lvalue+bitpos/len */
-       tbvalue_info bv; 
+       tbvalue_info bv;
        bv=v->u.bvalue ;
        ok=duel_get_target_bitfield(bv.lvalue, bv.bitpos, bv.bitlen, p,
                                     v->ctype->type_kind);
-       if(!ok) { v->u.bvalue=bv ; return FALSE ; } 
+       if(!ok) { v->u.bvalue=bv ; return FALSE ; }
    }
    else {
        ttarget_ptr lv=v->u.lvalue ;
@@ -202,7 +202,7 @@ LPROC put_rvalue(tvalue *v1,tvalue *v2,char *op)
       case CTK_PTR:     p= &v2->u.rval_ptr    ; n=sizeof(ttarget_ptr) ;break ;
       default: duel_assert(0);  /* other types not supported as rvalues */
    }
-   if(v1->val_kind == VK_BVALUE) 
+   if(v1->val_kind == VK_BVALUE)
        duel_gen_error("assignment to bitfields is not yet supported",0);
    else
    if(!duel_put_target_bytes(v1->u.lvalue,p,n)) /*store n debuggee bytes*/
@@ -221,7 +221,7 @@ PROC duel_set_symb_val(tvalue *r,char *format,tvalue *v1,tvalue *v2)
    strcpy(r->symb_val,s);
 }
 
-/* given a small int type (short,char,enum) return the upgraded (int or 
+/* given a small int type (short,char,enum) return the upgraded (int or
  * uint) type. Else return the original type
  */
 LFUNC tctype* upgrade_small_int_types(tctype *t)
@@ -237,7 +237,7 @@ LFUNC tctype* upgrade_small_int_types(tctype *t)
                      if(sizeof(tushort)==sizeof(int)) return ctype_uint ;
                      else return ctype_int ;
         default:
-                      return t ;    
+                      return t ;
    }
 }
 
@@ -251,7 +251,7 @@ LFUNC tctype* upgrade_small_int_types(tctype *t)
  * the types of v1 and v2. As a side effect, the answer for x|y where
  * y is a double will be given as double. it is up to the caller to
  * verify that v1,v2 have meaningful types of this operation
- * 
+ *
  */
 
 LFUNC tctype* find_numeric_result_type(tvalue *v1,tvalue *v2,
@@ -328,7 +328,7 @@ LPROC convert_scalar_type(tvalue *v,tctype *t,char *op)
 /* verify v is numeric, get its rvalue converted to type tout or at least int*/
 LPROC get_numeric_val(tvalue *v,char *op,tctype *tout)
 {
-   if(!ctype_kind_numeric(v->ctype)) 
+   if(!ctype_kind_numeric(v->ctype))
        duel_op_error("operand x of '%s' is not numeric",op,v,0);
    if(!tout) tout=upgrade_small_int_types(v->ctype);   /* upgrade to int etc */
    convert_scalar_type(v,tout,op);
@@ -337,7 +337,7 @@ LPROC get_numeric_val(tvalue *v,char *op,tctype *tout)
 /*verify v is integral, get its rvalue converted to type tout or at least int*/
 LPROC get_integral_val(tvalue *v,char *op,tctype *tout)
 {
-   if(!ctype_kind_integral(v->ctype)) 
+   if(!ctype_kind_integral(v->ctype))
        duel_op_error("operand x of '%s' is not integral",op,v,0);
    if(!tout) tout=upgrade_small_int_types(v->ctype);   /* upgrade to int etc */
    convert_scalar_type(v,tout,op);
@@ -357,7 +357,7 @@ LPROC get_scalar_val(tvalue *v,char *op)
    if(ctype_kind_ptr_like(v->ctype)) get_rvalue(v,op);
    else {
        tctype *t=upgrade_small_int_types(v->ctype);   /* upgrade to int */
-       if(!ctype_kind_numeric(v->ctype)) 
+       if(!ctype_kind_numeric(v->ctype))
            duel_op_error("operand x of '%s' is not a scalar",op,v,0);
        convert_scalar_type(v,t,op);
    }
@@ -367,7 +367,7 @@ LPROC get_pointer_val(tvalue *v,char *op,bool zero_ok)
 {
    if(ctype_kind_ptr_like(v->ctype)) get_rvalue(v,op);
    else
-   if(zero_ok && v->ctype->type_kind==CTK_INT && 
+   if(zero_ok && v->ctype->type_kind==CTK_INT &&
       v->val_kind==VK_RVALUE && v->u.rval_int==0) {
            v->ctype=ctype_voidptr ;
            v->u.rval_ptr=0 ;
@@ -405,7 +405,7 @@ LPROC copy_lvalues(tvalue *v1,tvalue *v2,char *op)
  * since structs compiled in different modules are each unique,
  * we settle for comparing the number of references (array/ptr)
  * and then  make sure the same type-kind is used, with the same
- * physical size. 
+ * physical size.
  * this allows, e.g. struct {short x,y }  and struct {int x}
  * to be considered equal. Possibly one could compare struct/union
  * for member sizes (but not names?!). this however requires to keep
@@ -416,19 +416,19 @@ LPROC duel_check_type_eq(tvalue *v1,tvalue *v2,char *op)
 {
     tctype *t1=v1->ctype, *t2=v2->ctype ;
     if(ctype_kind_ptr_like(t1) && ctype_kind_ptr_like(t2) &&  /*(void*) match*/
-       (t1->u.kid==ctype_void || t2->u.kid==ctype_void)) return; 
+       (t1->u.kid==ctype_void || t2->u.kid==ctype_void)) return;
 
-    while(ctype_kind_ptr_like(t1) && ctype_kind_ptr_like(t2)) 
+    while(ctype_kind_ptr_like(t1) && ctype_kind_ptr_like(t2))
         t1=t1->u.kid, t2=t2->u.kid ;
     if(t1==t2) return ; /* exact same type */
-    if(t1->type_kind != t2->type_kind || t1->size != t2->size) 
+    if(t1->type_kind != t2->type_kind || t1->size != t2->size)
         duel_op_error("incompatible types for op %s",op,v1,v2);
 }
 
 
 /**************************************************************************
  a set of mid-level functions follow. These actually apply duel/C
- operators to values 
+ operators to values
  **************************************************************************/
 
 /* these do pointer+int addition/subtraction of v1,v2 and store result in r.
@@ -519,7 +519,7 @@ LPROC do_op_subtract(tvalue *v1,tvalue *v2,tvalue *r)
            duel_check_type_eq(v1,v2,"- (ptr)");
            /* should compare pointer types */
            len=v1->ctype->u.kid->size ;
-           if(len<=0) 
+           if(len<=0)
               duel_op_error("illegal object size for op %s","- (ptr)",v1,v2);
            r->ctype=ctype_ptrdiff_t ;
            r->u.rval_ptrdiff_t= (v1->u.rval_ptr - v2->u.rval_ptr)/len ;
@@ -554,22 +554,22 @@ LFUNC bool comp_bin_op_eq_fvals(tvalue *v1,tvalue *v2)
    int frame_no ;
    ttarget_ptr frame_func,p ;
    if(v1f && v2f) return v1->u.fvalue == v2->u.fvalue ; /*cmp frames */
-   if(v1f) { 
+   if(v1f) {
        frame_no = v1->u.fvalue ;
        get_pointer_val(v2,"frame==x",FALSE) ;
-       if(v2->ctype->u.kid->type_kind!=CTK_FUNC) 
+       if(v2->ctype->u.kid->type_kind!=CTK_FUNC)
           duel_op_error("operand x of 'frame=x' not a func pointer",0,v2,0);
        p=v2->u.rval_ptr ;
    }
    else {
        frame_no = v2->u.fvalue ;
        get_pointer_val(v1,"x==frame",FALSE) ;
-       if(v1->ctype->u.kid->type_kind!=CTK_FUNC) 
+       if(v1->ctype->u.kid->type_kind!=CTK_FUNC)
           duel_op_error("operand x of 'x==frame' not a func pointer",0,v1,0);
        p=v1->u.rval_ptr ;
    }
    frame_func = duel_get_function_for_frame(frame_no);
-   return frame_func == p ; 
+   return frame_func == p ;
 }
 
 
@@ -579,31 +579,31 @@ LFUNC bool comp_bin_op_eq_fvals(tvalue *v1,tvalue *v2)
  */
 
 LPROC do_op_eq(tvalue *v1,tvalue *v2,tvalue *r)
-{                                                              
-   tctype *t=find_numeric_result_type(v1,v2,r,"==");            
-   r->ctype=ctype_int ;                                        
+{
+   tctype *t=find_numeric_result_type(v1,v2,r,"==");
+   r->ctype=ctype_int ;
    if(v1->val_kind==VK_FVALUE || v2->val_kind==VK_FVALUE) {
        r->u.rval_int = comp_bin_op_eq_fvals(v1,v2);
        return ;
    }
    if(ctype_kind_ptr_like(v1->ctype) || ctype_kind_ptr_like(v2->ctype)) {
-       get_pointer_val(v1,"x==y",TRUE); 
-       get_pointer_val(v2,"y==x",TRUE);       
-       duel_check_type_eq(v1,v2,"==");          
+       get_pointer_val(v1,"x==y",TRUE);
+       get_pointer_val(v2,"y==x",TRUE);
+       duel_check_type_eq(v1,v2,"==");
        r->u.rval_int = v1->u.rval_ptr == v2->u.rval_ptr ;
-       return ;                                 
-   }                                            
-   get_numeric_val(v1,"x==y",t);                   
-   get_numeric_val(v2,"y==x",t);                   
-   switch(t->type_kind) {                       
+       return ;
+   }
+   get_numeric_val(v1,"x==y",t);
+   get_numeric_val(v2,"y==x",t);
+   switch(t->type_kind) {
    case CTK_INT:   r->u.rval_int=v1->u.rval_int    == v2->u.rval_int   ;break;
    case CTK_UINT:  r->u.rval_int=v1->u.rval_uint   == v2->u.rval_uint  ;break;
    case CTK_LONG:  r->u.rval_int=v1->u.rval_long   == v2->u.rval_long  ;break;
    case CTK_ULONG: r->u.rval_int=v1->u.rval_ulong  == v2->u.rval_ulong ;break;
    case CTK_FLOAT: r->u.rval_int=v1->u.rval_float  == v2->u.rval_float ;break;
    case CTK_DOUBLE:r->u.rval_int=v1->u.rval_double == v2->u.rval_double;break;
-   default: duel_assert(0);                                     
-   }                                                            
+   default: duel_assert(0);
+   }
 }
 
 
@@ -642,7 +642,7 @@ mk_func_compare(do_op_ge,>=,">=","x>=y","y>=x",FALSE)
 mk_func_compare(do_op_le,<=,"<=","x<=y","y<=x",FALSE)
 mk_func_compare(do_op_ls,<, "<", "x<y", "y<x",FALSE)
 mk_func_compare(do_op_gt,>, ">", "x>y", "y>x",FALSE)
-#undef mk_func_compare 
+#undef mk_func_compare
 
 
 /* do_compare_questionmark -- handle the <? >? etc ops */
@@ -650,7 +650,7 @@ mk_func_compare(do_op_gt,>, ">", "x>y", "y>x",FALSE)
 LFUNC bool do_compare_questionmark(topcode op,tvalue *v1,tvalue *v2,tvalue *r)
 {
    tvalue tmp ;
-   tmp= *v1 ; 
+   tmp= *v1 ;
    switch(op) {
      case OP_EQQ: do_op_eq(v1,v2,r); break ;
      case OP_NEQ: do_op_ne(v1,v2,r); break ;
@@ -667,7 +667,7 @@ LFUNC bool do_compare_questionmark(topcode op,tvalue *v1,tvalue *v2,tvalue *r)
 
 
 /* apply indirection of a pointer.
- * this  is easy, you just force the value to be an rvalue pointer, then 
+ * this  is easy, you just force the value to be an rvalue pointer, then
  * make it into an lvalue with the pointed-to type.
  * useful for (*x x[y] x->y etc)
  * does not setup a symbolic value!
@@ -686,7 +686,7 @@ LPROC follow_pointer(tvalue *v,char *op,bool nonull)
 
 PROC duel_get_struct_val(tvalue *v,char *op)
 {
-   if(!ctype_kind_struct_like(v->ctype)) 
+   if(!ctype_kind_struct_like(v->ctype))
        duel_op_error("operand x of '%s' not a sturct/union",op,v,0);
    duel_assert(v->val_kind==VK_LVALUE);
 }
@@ -694,11 +694,11 @@ PROC duel_get_struct_val(tvalue *v,char *op)
 PROC duel_get_struct_ptr_val(tvalue *v,char *op)
 {
    follow_pointer(v,op,FALSE);
-   if(!ctype_kind_struct_like(v->ctype)) 
+   if(!ctype_kind_struct_like(v->ctype))
      duel_op_error("operand x of '%s' not a pointer to sturct/union",op,v,0);
 }
 
-FUNC int duel_get_posint_val(tvalue *v,char *op)    
+FUNC int duel_get_posint_val(tvalue *v,char *op)
 {
     int x ;
     x=duel_get_int_val(v,op);
@@ -714,14 +714,14 @@ LPROC do_op_indirection(tvalue *v)
    duel_set_symb_val(v,"*%s",v,0);
 }
 
-/* address operator (&x) 
+/* address operator (&x)
  * x must be an lvalue. it is converted into a pointer to the given type,
  * an rvalue.
  */
 
 LPROC do_op_address(tvalue *v)
 {
-   if(v->val_kind != VK_LVALUE) 
+   if(v->val_kind != VK_LVALUE)
        duel_op_error("operand x of '&x' is not a lvalue",0,v,0);
    v->val_kind=VK_RVALUE ;
    v->u.rval_ptr=v->u.lvalue ;
@@ -853,7 +853,7 @@ LPROC do_op_and(tvalue *v1,tvalue *v2,tvalue *r)
  */
 LPROC do_op_xor(tvalue *v1,tvalue *v2,tvalue *r)
 {
-   
+
    tctype *t=find_numeric_result_type(v1,v2,r,"^");
    get_integral_val(v1,"x^y",t);
    get_integral_val(v2,"y^x",t);
@@ -996,7 +996,7 @@ LPROC do_op_increment(tvalue *v,char *op,int inc,bool postfix)
 {
     tvalue lvalue_v,oldv ;
     char s[80] ;
-    if(v->val_kind!=VK_LVALUE) 
+    if(v->val_kind!=VK_LVALUE)
       duel_op_error("operand of '%s' must be an lvalue",op,v,0);
     lvalue_v= *v ;
     if(v->ctype->type_kind==CTK_PTR) get_pointer_val(v,op,FALSE);
@@ -1025,7 +1025,7 @@ LPROC do_op_increment(tvalue *v,char *op,int inc,bool postfix)
 LPROC do_op_frame(tvalue *v)
 {
    int f=duel_get_int_val(v,"frame(x)");
-   if(f<0 || f>=duel_get_frames_number()) 
+   if(f<0 || f>=duel_get_frames_number())
        duel_gen_error("Frame number too big",0);
    v->val_kind=VK_FVALUE ;
    v->ctype=ctype_int ;
@@ -1042,7 +1042,7 @@ LPROC do_op_parenthesis(tvalue *v)
     if(s[0]=='(' && s[l-1]==')') return ; /* val is (x) dont make it ((x)) */
     while(*s!=0 && (isalnum(*s) || *s=='_')) s++ ; /* find first non alnum*/
     if(*s==0) return ;  /* no need for (x) if x is a name or constant number */
-    duel_set_symb_val(v,"(%s)",v,0); 
+    duel_set_symb_val(v,"(%s)",v,0);
 }
 
 /***********************************************************************
@@ -1057,9 +1057,9 @@ LPROC do_op_parenthesis(tvalue *v)
 
 PROC duel_standardize_func_parm(tvalue *p)
 {
-   /* convert paramater into "standard" function calling */   
+   /* convert paramater into "standard" function calling */
    if(ctype_kind_integral(p->ctype)) get_integral_val(p,"f()",NULL);
-   else 
+   else
    if(ctype_kind_numeric(p->ctype))     /* float, double to double */
        convert_scalar_type(p,ctype_double,"f()");
    else
@@ -1092,7 +1092,7 @@ PROC duel_find_func_frame(tvalue *v,char *op)
 
 /* compute the n'th result of v1..v2 operator.
  * result is returned in r, returns false if there isnt an nth result
- * v1,v2 are converted to integer values (but can be used to call this 
+ * v1,v2 are converted to integer values (but can be used to call this
  * function again. errors are reported if they arenot integral.
  */
 
@@ -1122,7 +1122,7 @@ FUNC bool duel_do_op_to(tvalue *v1,tvalue *v2,int n,tvalue *r)
     return TRUE ;
 }
 
-/* convert value to True/False and return it 
+/* convert value to True/False and return it
  * in case of an illegal operand, indicateds the operator is (op)
  * main use: in operators '&&' '||' and 'if'
  */
@@ -1142,7 +1142,7 @@ PROC duel_do_cast(tctype *tout,tvalue *v)
 {
     tctype *t=v->ctype ;
     if(ctype_kind_scalar(t) && ctype_kind_scalar(tout)) {
-        if(tout->type_kind==CTK_ARRAY) 
+        if(tout->type_kind==CTK_ARRAY)
             duel_gen_error("casting to an array type is illegal",0);
         else convert_scalar_type(v,tout,"(cast) x");
     }
@@ -1150,7 +1150,7 @@ PROC duel_do_cast(tctype *tout,tvalue *v)
 }
 
 
-/* apply unary oprand op to the given value. The original value is 
+/* apply unary oprand op to the given value. The original value is
  * destoryed (of course)
  */
 
@@ -1186,7 +1186,7 @@ PROC duel_apply_post_unary_op(topcode op,tvalue *v)
  *                 the result in r. the bin op is a 'regular' one, like
  *                 '+', '*', etc. in the C language.
  * note: v1,v2 are destroyed
- * returns: true if a value has been produced, false otherwise. 
+ * returns: true if a value has been produced, false otherwise.
  *       (ops like '+' always return true. ops like '<=?' also return false)
  */
 
@@ -1210,12 +1210,12 @@ FUNC bool duel_apply_bin_op(topcode op,tvalue *v1,tvalue *v2,tvalue *r)
    case OP_LE:  do_op_le(v1,v2,r); break ;
    case '<':    do_op_ls(v1,v2,r); break ;
    case '>':    do_op_gt(v1,v2,r); break ;
-   case OP_EQQ: 
+   case OP_EQQ:
    case OP_NEQ:
    case OP_GEQ:
    case OP_LEQ:
    case OP_LSQ:
-   case OP_GTQ: return do_compare_questionmark(op,v1,v2,r); 
+   case OP_GTQ: return do_compare_questionmark(op,v1,v2,r);
    case '=':    do_op_assignment(v1,v2,r,"="); break ;
    default: duel_assert(0);
   }

@@ -1,5 +1,5 @@
 /*   DUEL - A Very High Level Debugging Langauge.  */
-/*   Public domain code			           */
+/*   Public domain code                            */
 /*   Written by Michael Golan mg@cs.princeton.edu  */
 /*$Header: /tmp_mnt/n/fs/grad2/mg/duel/RCS/types.c,v 1.8 93/03/12 06:01:50 mg Exp $*/
 
@@ -7,28 +7,28 @@
  */
 
 /*
- * $Log:	types.c,v $
+ * $Log:        types.c,v $
  * Revision 1.8  93/03/12  06:01:50  mg
  * use tuint for uint etc
- * 
+ *
  * Revision 1.7  93/02/03  21:55:26  mg
  * support "signed char"
- * 
+ *
  * Revision 1.6  93/01/12  21:54:25  mg
  * cleanup and set for release
- * 
+ *
  * Revision 1.5  93/01/03  07:31:24  mg
  * *** empty log message ***
- * 
+ *
  * Revision 1.4  92/10/19  15:09:28  mg
  * support zero fields/enumerators because gdb have them sometimes.
- * 
+ *
  * Revision 1.3  92/10/14  02:07:00  mg
  * misc
- * 
+ *
  * Revision 1.2  92/09/16  11:11:43  mg
  * added builtin charptr type
- * 
+ *
  */
 
 #include "duel.h"
@@ -63,7 +63,7 @@ FUNC tctype* duel_mkctype_func(tctype *t)
  */
 
 FUNC tctype* duel_mkctype_struct(char *name,size_t size,int fields_no,
-				 bool is_union)
+                                 bool is_union)
 {
   tctype *n ;
   n=(tctype *) duel_malloc(sizeof(tctype));
@@ -81,10 +81,10 @@ FUNC tctype* duel_mkctype_struct(char *name,size_t size,int fields_no,
   return n ;
 }
 
-/* insert field (field_no) into sturct/union (t), with type fctype 
+/* insert field (field_no) into sturct/union (t), with type fctype
  */
 PROC duel_mkctype_struct_field(tctype *t,int field_no,char *name,
-			       int bitpos,int bitlen, tctype *fctype)
+                               int bitpos,int bitlen, tctype *fctype)
 {
    tctype_field *f ;
    duel_assert(t->type_kind==CTK_STRUCT || t->type_kind==CTK_UNION);
@@ -103,7 +103,7 @@ PROC duel_mkctype_struct_field(tctype *t,int field_no,char *name,
  */
 
 FUNC tctype* duel_mkctype_enum(char *name,tctype_kind real_type_kind,
-			       size_t size,int enumerators_no)
+                               size_t size,int enumerators_no)
 {
   tctype *n ;
   n=(tctype *) duel_malloc(sizeof(tctype));
@@ -115,10 +115,10 @@ FUNC tctype* duel_mkctype_enum(char *name,tctype_kind real_type_kind,
   n->u.e.enumerators_no=enumerators_no ;
   if(enumerators_no==0) n->u.e.enumerators=NULL ;
   else {
-      n->u.e.enumerators= (tctype_enumerator *) 
+      n->u.e.enumerators= (tctype_enumerator *)
                    duel_malloc(enumerators_no*sizeof(tctype_enumerator));
       duel_bzero((char*) n->u.e.enumerators,
-	           enumerators_no*sizeof(tctype_enumerator));
+                   enumerators_no*sizeof(tctype_enumerator));
   }
   return n ;
 }
@@ -140,7 +140,7 @@ FUNC tctype* duel_mkctype_array(tctype *t,int size)
 {
   tctype *n ;
   if(t->size==0) duel_gen_error("array of a type of zero size is illegal",0);
-  if(size<=0) 	 duel_gen_error("array of size zero or negative is illegal",0);
+  if(size<=0)    duel_gen_error("array of size zero or negative is illegal",0);
   n=(tctype *) duel_malloc(sizeof(tctype));
   duel_bzero((char*) n,sizeof(tctype));
   n->type_kind=CTK_ARRAY ;
@@ -185,16 +185,14 @@ PROC duel_init_basic_ctypes(void)
   { ptrdiff_t p ; size_t s ;
     p= -1 ; s= -1 ;
     if(p>0)  duel_gen_error("bad ptrdiff_t - unsigned",0);
-  
-    if(sizeof(p)==sizeof(int)) 	     ctype_ptrdiff_t=ctype_int ;
+
+    if(sizeof(p)==sizeof(int))       ctype_ptrdiff_t=ctype_int ;
     else if(sizeof(p)==sizeof(long)) ctype_ptrdiff_t=ctype_long ;
     else duel_gen_error("bad ptrdiff_t size",0);
 
-    if(sizeof(s)==sizeof(int)) 	ctype_size_t= (s<0)? ctype_int:ctype_uint ;
-    else 
+    if(sizeof(s)==sizeof(int))  ctype_size_t= (s<0)? ctype_int:ctype_uint ;
+    else
     if(sizeof(s)==sizeof(long)) ctype_size_t= (s<0)? ctype_long:ctype_ulong ;
     else duel_gen_error("bad size_t size",0);
    }
 }
-
-

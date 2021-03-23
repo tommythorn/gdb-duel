@@ -1,23 +1,23 @@
 -------------------------------------------------------------------------------
 README for DUEL 1.10 distribution   mg@cs.princeton.edu (M. Golan) Mar 93
 -------------------------------------------------------------------------------
-see WHATNEW for what's new in version 1.10. 
+see WHATNEW for what's new in version 1.10.
 
 DUEL -  A high level language for debugging C programs.
 
-  Duel is a special purpose language designed for concise state 
+  Duel is a special purpose language designed for concise state
   exploration of debugged C programs under existing debuggers.
-  It allows you to explore your program's state better than either 
+  It allows you to explore your program's state better than either
   the debugger's commands, a C interpreter, or print statements
-  added to your programs. The debugger is extended with the new 
+  added to your programs. The debugger is extended with the new
   'dl' command for Duel expressions, e.g.,
 
      gdb> dl x[0..10].level >? 5
      x[3].level = 14
      x[8].level = 6
 
-  prints the "level" fields of array elements x[0] to x[10] that are greater 
-  than 5.  The output includes the values 14 and 6, as well as their 
+  prints the "level" fields of array elements x[0] to x[10] that are greater
+  than 5.  The output includes the values 14 and 6, as well as their
   symbolic representation "x[3].level" and "x[8].level". Linked list and
   other complex data structures are just as easy. Most of C (e.g. for, if)
   is also supported, e.g., int i; for(i=0; i<11; i++) if(x[i].level>5) x[i].
@@ -27,15 +27,15 @@ Duel a try! The man page & help even include a summary of useful gdb commands.
 The man page (duel.1) contains an introduction & many examples.
 
 Duel is debugger-independent, but the current distribution interface only
-with gdb. You will need the source for gdb-4.6, 4.7 or 4.8. Duel is public 
-domain code. Do whatever you like with it - add it to commercial debuggers, 
-to dbx/sdb or even make it part of the GNU project. 
+with gdb. You will need the source for gdb-4.6, 4.7 or 4.8. Duel is public
+domain code. Do whatever you like with it - add it to commercial debuggers,
+to dbx/sdb or even make it part of the GNU project.
 
 NO PART OF THIS DISTRIBUTION CONTAINS ANY COPYRIGHT OR DERIVED CODE,
-(i.e. no GPL code, either). Free and public domain code need no disclaimer, 
+(i.e. no GPL code, either). Free and public domain code need no disclaimer,
 which is obvious to anyone in the software business.
 
-Duel is available for anonymous ftp from ftp.cs.princeton.edu, in 
+Duel is available for anonymous ftp from ftp.cs.princeton.edu, in
 /duel/duel.tar.Z. "tar.Z" format means you should use the command
  "zcat duel.tar.Z | tar xf -" to unpack the files.
 
@@ -45,7 +45,7 @@ formatting, as /duel/usenix.paper.ps.Z. The software & man page are more
 up-to-date though.
 
 See MANIFEST for a list of files in the distribution. The file INSTALL
-explains how to install duel. MANUAL is a formatted version of the manual 
+explains how to install duel. MANUAL is a formatted version of the manual
 duel.1.
 
 If you are using duel and find it useful, or have any comments or suggestion,

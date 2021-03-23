@@ -8,72 +8,72 @@
  */
 
 /*
- * $Log:	duelgdb.c,v $
+ * $Log:        duelgdb.c,v $
  * Revision 1.20  93/03/20  10:35:48  mg
  * fixed system("date")... didnt work on OS/2
- * 
+ *
  * Revision 1.19  93/03/13  03:28:49  mg
  * bug fixed frame(0).unknown_name caused a crash
  * bug fixed duel didnt support enum of length zero but turns out gdb tables
  * have such things (specifically, for some gdb internals!)
- * 
+ *
  * Revision 1.18  93/03/12  05:43:22  mg
  * Version 1.10 - tuint instead of uint etc, fixed gdb48 recognis. problem
- * 
+ *
  * Revision 1.17  93/02/27  06:01:01  mg
- * improved unsigned char default machines support, 
+ * improved unsigned char default machines support,
  * convert explicit uchar into "char" if they are the same.
- * 
+ *
  * Revision 1.16  93/02/23  19:11:10  mg
  * beauty changes + gdb4.8 support
- * 
+ *
  * Revision 1.15  93/02/04  02:09:18  mg
  * fixed enum enum names
- * 
+ *
  * Revision 1.14  93/02/04  00:54:26  mg
  * arr. fixed.
- * 
+ *
  * Revision 1.13  93/02/03  21:54:14  mg
  * create duel.out unless compiling with NO_DUEL_OUT
- * 
+ *
  * Revision 1.12  93/02/03  21:46:33  mg
  * fixed problems with null gdb type names.
  * support "signed char"
- * 
+ *
  * Revision 1.11  93/01/21  21:22:15  mg
  * *** empty log message ***
- * 
+ *
  * Revision 1.10  93/01/13  16:19:33  mg
  * support mini symbol table lookup (malloc, printf on SUN didnt work)
- * 
+ *
  * Revision 1.9  93/01/12  21:30:04  mg
  * cleanup and set for release
- * 
+ *
  * Revision 1.8  93/01/06  23:59:21  mg
  * new memory alloc/release. moved target's malloc into duel code
  * allow ^c to work, fixed help, fixed variable lookup for specific frame.
- * 
+ *
  * Revision 1.7  93/01/03  07:27:11  mg
  * support function calls!
- * 
+ *
  * Revision 1.6  92/12/24  23:33:13  mg
  * frames support
- * 
+ *
  * Revision 1.5  92/10/19  15:06:29  mg
  * made lcc happy
  * no svalues
  * new registers support and way of getting vars.
  * these are temporary changes, new frames supports soon
- * 
+ *
  * Revision 1.4  92/10/14  02:03:53  mg
  * misc/gdb4.6/duel vars using malloc
- * 
+ *
  * Revision 1.3  92/09/16  11:06:22  mg
  * a lot more functions: get typedef/tags, alloc debuggee mem. +cosmetics
- * 
+ *
  * Revision 1.2  92/09/15  05:37:28  mg
  * fix enum size bug. added headers
- * 
+ *
  */
 
 
@@ -148,9 +148,9 @@ FUNC bool duel_put_target_bytes(ttarget_ptr to,void *from,size_t n)
 FUNC bool duel_get_target_bitfield(ttarget_ptr struct_at,int bitpos,
                                     int bitlen,void *to,tctype_kind tkind)
 {
-  tuint bits ;  
+  tuint bits ;
   duel_assert(tkind==CTK_INT || tkind==CTK_UINT);
-  if(!duel_get_target_bytes(struct_at+bitpos/8,&bits,sizeof(bits))) 
+  if(!duel_get_target_bytes(struct_at+bitpos/8,&bits,sizeof(bits)))
       return FALSE;
 
   /* now, move the field to the 'bottom' of bits, by shifting right */
@@ -159,11 +159,11 @@ FUNC bool duel_get_target_bitfield(ttarget_ptr struct_at,int bitpos,
   bits >>= (sizeof(bits)*8-bitpos-bitlen) ;
 #else
   bits >>= bitpos ;
-#endif  
+#endif
 
  /* finally chop down 'bits' to only bitlen significant bits,
   * or sign-extend it if output field is 'int' and the sign is 1.
-  * ~0 is all ones, shift it to have bitlen zeros. Complement to get 
+  * ~0 is all ones, shift it to have bitlen zeros. Complement to get
   * a bitlen string of 1's in the low-order bits. Common ugly hacks.
   * Note: this code assume 2's complement
   */
@@ -193,7 +193,7 @@ LPROC duel_convert_value_from_gdb(value gv, tvalue *dv)
   }
   else
   if(ctype_kind_scalar(dv->ctype) && (VALUE_LVAL(gv) == not_lval ||
-     VALUE_LVAL(gv) == lval_register || 
+     VALUE_LVAL(gv) == lval_register ||
      VALUE_LVAL(gv) == lval_reg_frame_relative )) {
       dv->val_kind=VK_RVALUE ;
       duel_bcopy(&dv->u,VALUE_CONTENTS_RAW(gv),dv->ctype->size);
@@ -212,43 +212,43 @@ LPROC duel_convert_value_from_gdb(value gv, tvalue *dv)
 
 LFUNC value convert_duel_val_to_gdb_val(tvalue *v)
 {
-   value gv ; 
+   value gv ;
    if(v->val_kind!=VK_RVALUE) return 0 ; /* cant handle lvals */
    switch(v->ctype->type_kind) {
 /* duel standardize func parms, so this code is not required. if this
  * function is used for more than func parms, as its name implies, we will
  * need to do better than this.
- * there is no gdb "builtin_type_signed_char", so we assume char 
-   case CTK_CHAR:   
+ * there is no gdb "builtin_type_signed_char", so we assume char
+   case CTK_CHAR:
      gv=value_from_longest(builtin_type_char,v->u.rval_char);          break;
-   case CTK_SCHAR:   
+   case CTK_SCHAR:
      gv=value_from_longest(builtin_type_char,v->u.rval_schar);         break;
-   case CTK_UCHAR:  
+   case CTK_UCHAR:
      gv=value_from_longest(builtin_type_unsigned_char,v->u.rval_char); break;
-   case CTK_USHORT: 
+   case CTK_USHORT:
      gv=value_from_longest(builtin_type_unsigned_short,v->u.rval_ushort);break;
-   case CTK_SHORT:  
+   case CTK_SHORT:
      gv=value_from_longest(builtin_type_unsigned_short,v->u.rval_short);break;
 */
-   case CTK_INT:    
+   case CTK_INT:
      gv=value_from_longest(builtin_type_int, v->u.rval_int);            break;
-   case CTK_UINT:   
+   case CTK_UINT:
      gv=value_from_longest(builtin_type_unsigned_int, v->u.rval_uint) ; break ;
-   case CTK_LONG:   
+   case CTK_LONG:
      gv=value_from_longest(builtin_type_long, v->u.rval_long)         ; break ;
-   case CTK_ULONG:  
+   case CTK_ULONG:
      gv=value_from_longest(builtin_type_unsigned_long,v->u.rval_ulong); break ;
-   case CTK_FLOAT:  
+   case CTK_FLOAT:
      gv=value_from_double(builtin_type_float, v->u.rval_float) ; break ;
-   case CTK_DOUBLE: 
+   case CTK_DOUBLE:
      gv=value_from_double(builtin_type_double, v->u.rval_double) ; break ;
-   case CTK_PTR:    
+   case CTK_PTR:
      gv=value_from_longest(lookup_pointer_type(builtin_type_void),
                         (long) v->u.rval_ptr) ;break ;
    default: duel_assert(0);
    }
    return gv ;
-}       
+}
 
 /* make a function call to the target.
  * this is the only case where we convert duel tvalue into gdb's values.
@@ -273,9 +273,9 @@ PROC duel_target_func_call(tvalue *func, tvalue *parms[],
     gftype = lookup_pointer_type(gftype);
     if(!gftype)
             duel_op_error("unsupproted func return type",0,func,0);
- 
+
     gfunc = value_from_longest(gftype,(LONGEST) func->u.lvalue);
-    
+
     grval=call_function_by_hand(gfunc,parms_no,gparms);
     if(func->ctype->u.kid->type_kind==CTK_VOID) return ; /* no return val*/
     duel_convert_value_from_gdb(grval,rval);
@@ -294,7 +294,7 @@ struct {
 LPROC duel_add_hash(struct type *t, tctype *ct)
 {
     int start,i=type_hash_func(t);
-    start=i ; 
+    start=i ;
     do {
         if(duel_thash[i].t==0) {
             duel_thash[i].t=t ;
@@ -313,7 +313,7 @@ LPROC duel_add_hash(struct type *t, tctype *ct)
 LFUNC tctype* duel_find_hash(struct type *t)
 {
     int start,i=type_hash_func(t);
-    start=i ; 
+    start=i ;
     do {
         if(duel_thash[i].t==0) break ;
         if(duel_thash[i].t==t) return duel_thash[i].ct ;
@@ -330,11 +330,11 @@ LFUNC tctype* duel_find_hash(struct type *t)
 LFUNC struct type* duel_convert_type_to_gdb(tctype *ct)
 {
    int i ;
-   for(i=0 ; i<TYPE_HASH_SIZE ; i++) 
+   for(i=0 ; i<TYPE_HASH_SIZE ; i++)
        if(duel_thash[i].ct==ct) return duel_thash[i].t ;
 
-   if(ct->type_kind==CTK_FUNC && ct->u.kid->type_kind==CTK_INT) 
-	  return  lookup_function_type (builtin_type_int);
+   if(ct->type_kind==CTK_FUNC && ct->u.kid->type_kind==CTK_INT)
+          return  lookup_function_type (builtin_type_int);
    return NULL ;
 }
 
@@ -358,16 +358,16 @@ LFUNC tctype* duel_convert_type_from_gdb(struct type *t)
       else if(strcmp(TYPE_NAME(t),"unsigned int")==0)   ct=ctype_uint ;
       else if(strcmp(TYPE_NAME(t),"unsigned long")==0)  ct=ctype_ulong ;
       else if(strcmp(TYPE_NAME(t),"signed char")==0)  {
-	  /* use generic "char" for "schar" if they are the same.
- 	   * reason: some compilers (lcc) make user "char" into "schar"
-	   * in the symbol tables, but only "char*" is printed as strings
-	   */
-	   if((char) -1 == -1) ct=ctype_char ;
+          /* use generic "char" for "schar" if they are the same.
+           * reason: some compilers (lcc) make user "char" into "schar"
+           * in the symbol tables, but only "char*" is printed as strings
+           */
+           if((char) -1 == -1) ct=ctype_char ;
            else ct=ctype_schar ;
       }
       else if(strcmp(TYPE_NAME(t),"unsigned char")==0)  { /* same for uchar*/
-	   if((char) -1 != -1) ct=ctype_char ;
-	   else ct=ctype_uchar ;
+           if((char) -1 != -1) ct=ctype_char ;
+           else ct=ctype_uchar ;
       }
       break;
    case TYPE_CODE_FLT:
@@ -379,7 +379,7 @@ LFUNC tctype* duel_convert_type_from_gdb(struct type *t)
       if(strcmp(TYPE_NAME(t),"void")==0) ct=ctype_void ;
       break;
    case TYPE_CODE_PTR:
-      {  
+      {
        /* the pointer might get defined when converting the target, so
         * check the hashing again (reason: self-referencing structs)
         */
@@ -401,13 +401,13 @@ LFUNC tctype* duel_convert_type_from_gdb(struct type *t)
    case TYPE_CODE_UNION:
       { int i,n=TYPE_NFIELDS(t);
         char *name=TYPE_NAME(t);
-	if(name == NULL) name="" ; /* duel can't handle null ptr! */
+        if(name == NULL) name="" ; /* duel can't handle null ptr! */
         if(strncmp(name,"struct ",7)==0) name+=7 ;
         if(strncmp(name,"union ",6)==0) name+=6 ;
         ct=duel_mkctype_struct(name,TYPE_LENGTH(t),n,
                         TYPE_CODE(t)==TYPE_CODE_UNION);
         duel_add_hash(t,ct);  /* so a pointer to myself is recognized */
-        for(i=0 ; i<n ; i++) 
+        for(i=0 ; i<n ; i++)
            duel_mkctype_struct_field(ct,i,TYPE_FIELD_NAME(t,i),
                 TYPE_FIELD_BITPOS(t,i), TYPE_FIELD_BITSIZE(t,i),
                 duel_convert_type_from_gdb(TYPE_FIELD_TYPE(t,i)));
@@ -416,31 +416,31 @@ LFUNC tctype* duel_convert_type_from_gdb(struct type *t)
    case TYPE_CODE_ENUM:
         /* TYPE_LENGTH(t) tell how big it is. I assume signed integral types.
          * it is unclear if gdb supports unsigned enums and how
-         * (e.g. enum { x=0,y=250 } stored in uchar 
+         * (e.g. enum { x=0,y=250 } stored in uchar
          * FIELDS contain the tags, BITPOS is the assigned value.
          */
       { int i,n=TYPE_NFIELDS(t),len=TYPE_LENGTH(t);
-	char *name=TYPE_NAME(t);
+        char *name=TYPE_NAME(t);
         tctype_kind k ;
-	if(name==NULL) name="" ;	/* duel can't handle null ptr */
+        if(name==NULL) name="" ;        /* duel can't handle null ptr */
         if(strncmp(name,"enum ",5)==0) name+=5 ;
         /* select 'real' stored type. note order important if short==int.
          * long is not allowed as far as I know ANSI C (enums are conv. to int)
-	 * Amazingly, some internal gdb struct (sym) can have an enum of
-	 * size zero (enum language, gdb4.8). We allow this as int but warn.
-	 * gdb> p sizeof(sym->ginfo.lang_specific.language) gives zero
+         * Amazingly, some internal gdb struct (sym) can have an enum of
+         * size zero (enum language, gdb4.8). We allow this as int but warn.
+         * gdb> p sizeof(sym->ginfo.lang_specific.language) gives zero
          */
-	if(len==0) {
-	    printf("Warning: enum %s is size zero. assumed int\n",name);
-	    len=sizeof(int);
-	}
+        if(len==0) {
+            printf("Warning: enum %s is size zero. assumed int\n",name);
+            len=sizeof(int);
+        }
         if(len==sizeof(int))        k=CTK_INT ;
         else if(len==sizeof(short)) k=CTK_SHORT ;
         else if(len==sizeof(char))  k=CTK_CHAR ;
         else duel_assert(0);
 
         ct=duel_mkctype_enum(name,k,len,n);
-        for(i=0 ; i<n ; i++) 
+        for(i=0 ; i<n ; i++)
            duel_mkctype_enumerator(ct,i,TYPE_FIELD_NAME(t,i),
                 TYPE_FIELD_BITPOS(t,i));
       }
@@ -456,7 +456,7 @@ LFUNC tctype* duel_convert_type_from_gdb(struct type *t)
 /* optimize frame access so frame(100..0) doesnt start the search from 0
  * everytime. similar to selected_frame etc, but we dont want to mess up
  * gdb's own frame setup (for up/down/print etc)
- * this optimization should have been part of gdb, not here. 
+ * this optimization should have been part of gdb, not here.
  * ie. duel_select_frame should be a simple fast gdb call.
  * we dont optimze going to frame 7 from frame 5 etc, this isn't typical.
  * set last/tot frames to -2 to assure recomputeations (-1 is not good enuf)
@@ -466,7 +466,7 @@ static FRAME last_frame ;       /* last frame pointer we used */
 static int  last_frame_no ;     /* last frame number we used */
 static int  tot_frames_no ;     /* tot number of frames */
 
-LFUNC FRAME duel_select_frame(int frame_no) 
+LFUNC FRAME duel_select_frame(int frame_no)
 {
     FRAME frame ;
     if(last_frame_no==frame_no)   frame=last_frame ;
@@ -477,11 +477,11 @@ LFUNC FRAME duel_select_frame(int frame_no)
     else {
         int count=frame_no ;
         frame=get_current_frame();
-        while (frame && --count >= 0) 
+        while (frame && --count >= 0)
             frame = get_prev_frame (frame);
     }
     duel_assert(frame); /* callee should have checked frames no*/
-    last_frame = frame ; 
+    last_frame = frame ;
     last_frame_no = frame_no ;
     return frame ;
 }
@@ -495,15 +495,15 @@ FUNC bool duel_get_target_variable(char *name, int frame_no, tvalue *v)
   value gv ;                    /* gdb value */
 
   if(frame_no== -1) {           /* use the user selected frame and block */
-      frame = selected_frame ;  
-      blk = get_selected_block() ;     
+      frame = selected_frame ;
+      blk = get_selected_block() ;
   }
   else {
       frame=duel_select_frame(frame_no) ;
       blk = get_frame_block(frame);
   }
   sym = lookup_symbol (name, blk, VAR_NAMESPACE,0,0);
-  if(!sym) {		/* look up the symbol that has no debug info*/
+  if(!sym) {            /* look up the symbol that has no debug info*/
      struct minimal_symbol *m ;
      if(frame_no != -1) return FALSE ; /* only locals looked up- not found*/
      m=lookup_minimal_symbol (name,NULL); /* find printf, malloc etc */
@@ -516,12 +516,12 @@ FUNC bool duel_get_target_variable(char *name, int frame_no, tvalue *v)
 #else
      v->u.lvalue=(ttarget_ptr) m->address ;
 #endif
-	/* guess it is an int if it is a data type, an int func if text */
+        /* guess it is an int if it is a data type, an int func if text */
      if(m->type == mst_data || m->type == mst_bss) v->ctype=ctype_int ;
      else
      if(m->type == mst_text) v->ctype=duel_mkctype_func(ctype_int);
-     else return FALSE ;     
-     return TRUE ;     
+     else return FALSE ;
+     return TRUE ;
   }
   if(SYMBOL_CLASS(sym)==LOC_TYPEDEF) return FALSE ;
   /* if frame specificed, allow only local variables to be found */
@@ -530,7 +530,7 @@ FUNC bool duel_get_target_variable(char *name, int frame_no, tvalue *v)
   gv=read_var_value(sym,frame);
   if(gv==0) return FALSE ; /* frame not found or illegal */
   duel_convert_value_from_gdb(gv,v);
-  return TRUE ;         
+  return TRUE ;
 }
 
 
@@ -628,8 +628,8 @@ r   # restart program (run)      dl exp    # Duel\n\
 n 5 # repeat n 5 times (s too)   up/down   # move up/down the frames stack\n");
 }
 
-/* tracks the use of duel commands into "duel.out" 
- * useful so people can send me a script of duel commands usage 
+/* tracks the use of duel commands into "duel.out"
+ * useful so people can send me a script of duel commands usage
  */
 
 static void track_usage(char *exp)
@@ -638,26 +638,26 @@ static void track_usage(char *exp)
     static first = 1 ;
     static FILE *f ;
     if(first) {
-	time_t t ; 
-	first=0 ;
-	if((f=fopen("duel.out","r"))==NULL) {	/* no file at all */
-	    if((f=fopen("duel.out","w"))==NULL) return ;
-	    fprintf(f,"\
+        time_t t ;
+        first=0 ;
+        if((f=fopen("duel.out","r"))==NULL) {   /* no file at all */
+            if((f=fopen("duel.out","w"))==NULL) return ;
+            fprintf(f,"\
 Duel commands you have used while debugging.\n\
 Please send this file to mg@cs.princeton.edu (Michael Golan),\n\
 so he can collect user's experience for his PhD. Thanx!\n");
-	}
-	else if((f=fopen("duel.out","a"))==NULL) return ;
+        }
+        else if((f=fopen("duel.out","a"))==NULL) return ;
 
-	time(&t) ; 
-	fprintf(f,"%s",ctime(&t));
+        time(&t) ;
+        fprintf(f,"%s",ctime(&t));
     }
     fprintf(f,"gdb> dl %s\n",exp);
     fflush(f);
 #endif
 }
 
-/* 
+/*
  * entry point from gdb.
  * produce help in gdb's format, or call duel enter point.
  * we allow ^c to quit immidiatly, and setup memory release cleanup.
@@ -675,7 +675,7 @@ void duel_command(char *exp,int from_tty)
       immediate_quit++ ;
       duel_parse_and_eval(exp);
       immediate_quit-- ;
-      if(!exp || strcmp(exp,"help")==0 || strcmp(exp,"?")==0) 
+      if(!exp || strcmp(exp,"help")==0 || strcmp(exp,"?")==0)
           printf("Try \"dl gdb\" for a summary of useful gdb commands\n");
   }
 }
@@ -686,5 +686,5 @@ _initialize_duel()
 "Evaluate Duel expressions. Duel is a very high level debugging langauge.\n\
 \"dl help\" for help. \"dl gdb\" for summary of GDB commands\n");
   add_com_alias ("dl", "duel", class_vars, 1);
-  
+
 }

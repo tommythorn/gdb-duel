@@ -1,23 +1,23 @@
 /*   DUEL - A Very High Level Debugging Langauge.  */
-/*   Public domain code			           */
+/*   Public domain code                            */
 /*   Written by Michael Golan mg@cs.princeton.edu  */
 /*$Header: /tmp_mnt/n/fs/grad2/mg/duel/RCS/error.c,v 1.5 93/03/12 05:48:27 mg Exp $*/
 
 /* display errors in a neat way */
 
 /*
- * $Log:	error.c,v $
+ * $Log:        error.c,v $
  * Revision 1.5  93/03/12  05:48:27  mg
  * support output redirection
- * 
+ *
  * Revision 1.4  93/01/12  21:35:31  mg
  * cleanup and set for release
- * 
+ *
  */
 
 #include "duel.h"
 
-static tnode *curr_eval_node ;	/* current node being evaluated */
+static tnode *curr_eval_node ;  /* current node being evaluated */
 static  char *curr_inputstr ;   /* current input string being eval */
 
 /* indicate the active node where an operator is now evaluated.
@@ -33,7 +33,7 @@ FUNC tnode* duel_set_eval_loc(tnode *n)
     return prev ;
 }
 
-/* indicate the current input string which is evaluated 
+/* indicate the current input string which is evaluated
  * (intended for future versions with multiple input strings)
  */
 
@@ -85,7 +85,7 @@ PROC duel_op_error(char *mesg,char *op,tvalue *v1,tvalue *v2)
       duel_sprint_scalar_value(s,v2);
       duel_printf("\n\t\t-- value: %s\n",s);
     }
-    
+
     duel_abort();
 }
 
@@ -110,5 +110,3 @@ PROC duel_fatal(char *msg)
    duel_printf("Fatal Duel error: %s\n",msg);
    duel_abort();
 }
-
-

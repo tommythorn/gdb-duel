@@ -1,5 +1,5 @@
 /*   DUEL - A Very High Level Debugging Langauge.  */
-/*   Public domain code			           */
+/*   Public domain code                            */
 /*   Written by Michael Golan mg@cs.princeton.edu  */
 /*$Header: /tmp_mnt/n/fs/grad2/mg/duel/RCS/proto.h,v 1.10 93/03/12 06:01:28 mg Exp $*/
 
@@ -9,11 +9,11 @@ FUNC tctype* duel_mkctype_ptr(tctype *t);
 FUNC tctype* duel_mkctype_func(tctype *t);
 FUNC tctype* duel_mkctype_array(tctype *t,int size);
 FUNC tctype* duel_mkctype_struct(char *name,size_t size,int fields_no,
-				 bool is_union);
+                                 bool is_union);
 PROC duel_mkctype_struct_field(tctype *t,int field_no,char *name,
-			       int bitpos,int bitlen, tctype *fctype);
+                               int bitpos,int bitlen, tctype *fctype);
 FUNC tctype* duel_mkctype_enum(char *name,tctype_kind real_type_kind,
-			       size_t size,int enumerators_no);
+                               size_t size,int enumerators_no);
 PROC duel_mkctype_enumerator(tctype *t,int enumerator_no,char *name,int val);
 
 PROC duel_init_basic_ctypes(void);
@@ -73,7 +73,7 @@ FUNC bool duel_get_target_bytes(ttarget_ptr from,void *to,size_t n);
 FUNC bool duel_put_target_bytes(ttarget_ptr to,void *from,size_t n);
 
 FUNC bool duel_get_target_bitfield(ttarget_ptr struct_at,int bitpos,
-				    int bitlen,void *to,tctype_kind tkind);
+                                    int bitlen,void *to,tctype_kind tkind);
 FUNC bool duel_get_target_variable(char *name, int frame_no, tvalue *v);
 FUNC tctype* duel_get_target_typedef(char *name);
 FUNC tctype* duel_get_target_struct_tag(char *name);
@@ -84,7 +84,7 @@ FUNC ttarget_ptr duel_alloc_target_space(size_t n);
 FUNC int duel_get_frames_number(void);
 FUNC ttarget_ptr duel_get_function_for_frame(int frame_no);
 PROC duel_target_func_call(tvalue *func, tvalue *parms[],
-			    int parms_no,tvalue *ret);
+                            int parms_no,tvalue *ret);
 
 /* prototypes for misc functions */
 
@@ -97,4 +97,3 @@ FUNC tvalue* duel_find_alias(char *name);
 PROC duel_set_alias(char *name,tvalue *v);
 PROC duel_clear_aliases(void);
 PROC duel_show_aliases(void);
-

@@ -1,10 +1,10 @@
 
  += -= etc operators
- initialize variables e.g. int x=0 , maybe even scopes 
+ initialize variables e.g. int x=0 , maybe even scopes
  set declared var to zero.
  allow x++ for aliases as a special case.
- x->?y or x?->y to be like  (x!=?0)->y OR x?? or ??x  as (x!=?0)  
-  
+ x->?y or x?->y to be like  (x!=?0)->y OR x?? or ??x  as (x!=?0)
+
  +/ */ &/ |/ ^/   ==/ !=/ </ >/ <=/ >=/
  src(location) as scope
  istype(type,x)  to check type of x
@@ -48,18 +48,18 @@ several ways to manage _cyc: a boolean, or equal to head; true if
 this is already a cycle, or a function cyc(next), which return true if
 next would cycle, or return next unles it would cycle, etc.
 This last one seems to handle most cases:
-head-->(cyc(left),cyc(right))	- return tree, igoring cycles
-head-->(cyc(0),left,right) 	- like head->(left,right), but mention of cyc
-				  which by itself does nothing, cause general
-				  cycle detection as errors
-as above, but left!=?_		- detect general cycles, pointer to self ok
+head-->(cyc(left),cyc(right))   - return tree, igoring cycles
+head-->(cyc(0),left,right)      - like head->(left,right), but mention of cyc
+                                  which by itself does nothing, cause general
+                                  cycle detection as errors
+as above, but left!=?_          - detect general cycles, pointer to self ok
 
 While we adding cyc(), we can also add _depth to indicate current depth,
 e.g. head-->(if(_depth<6) (left,right)) -- expand only to depth 6
-and also acceess to the current path with _path(i), _path(0)=_ and 
+and also acceess to the current path with _path(i), _path(0)=_ and
 _path(_depth-1)=head
 head-->(cyc(0), if(! ||/_path(.._deapth)==left) left, ...)
-		which avoids cycles "in the path"
+                which avoids cycles "in the path"
 
 If you an strong opinion on this subject, or a better idea, lemme know!
 
@@ -80,7 +80,7 @@ Increment count for x..y   (x..y:+z and x..y:-z)
 ------------------------------------------------
 The x..y operator could be extended to support an increment or decrement
 value. This would allow 1..n to be written as 1..n:+1 so when n==0 it
-will not produce the surprising 1,0 results. 
+will not produce the surprising 1,0 results.
 However, 0..10:+2 could also be written as (0..5)*2, so it is unclear
 that such operators are really needed (maybe just x..+y, x..-y to force
 the direction).
@@ -91,8 +91,8 @@ Duel functions / print procedures
 the command:  dl define x expr
 will define x to be duel procedure for expression expr.
 x can then be used like an alias (indeed, it will probably be kept in
-the alias table with a special value). x evaluation returns multiple 
-values. 
+the alias table with a special value). x evaluation returns multiple
+values.
 There is no need parameters, since emp.x would call "x" using the implicit
 parameter "_" set as emp. the expression for x is essentially put into
 the code for the execution. Having no parameters (except implicit ones)
@@ -101,11 +101,11 @@ make it easier to document, use etc.
 Such functions (macros?) are most useful for output. e.g.
 dl define empout  val_type,a, u.if(val_type==0) code*6,name else code,z
 dl emp.empout
-will produce output for 
+will produce output for
   struct {
    int val_type,code ;
    char a;
-   union { char *name ; double z ; } u 
+   union { char *name ; double z ; } u
    } emp ;
 
 the empout procedure can be defined just once, and used to output such
@@ -117,7 +117,7 @@ for expansion. We add syntax like  dl define out(type) expr
 then whenever an expression of the given type is to be printed, this
 code is evaluated instead, e.g.:
 dl define out(struct emp) ...
-dl emp   	## this calls the above out code for the output.
+dl emp          ## this calls the above out code for the output.
 
 We can also expand expressions by calling the right function, e.g.
 The operator "\" calls a function to expand a specific type:

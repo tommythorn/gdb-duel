@@ -7,22 +7,22 @@
  */
 
 /*
- * $Log:	eval.c,v $
+ * $Log:        eval.c,v $
  * Revision 1.13  93/03/19  15:39:34  mg
  * fixed bug in left->left symbolic, and long symbolics which caused crashes
- * 
+ *
  * Revision 1.12  93/03/12  05:48:45  mg
  * fixed sizeof(type) symbolic
- * 
+ *
  * Revision 1.11  93/02/26  04:59:51  mg
  * improved symbolic debugging of #/
- * 
+ *
  * Revision 1.10  93/02/03  21:47:41  mg
  * fixed dot stack bug; fixed func-call last parm eval bug
- * 
+ *
  * Revision 1.9  93/01/12  21:50:26  mg
  * cleanup and set for release
- * 
+ *
  * Revision 1.8  93/01/07  00:09:34  mg
  * scope stack changes a bit.
  * clear/aliases commands.
@@ -30,27 +30,27 @@
  * allow fields in y for x@y, x pointer.
  * fixed eval_node setup
  * added &&/ ||/
- * 
- * 
+ *
+ *
  * Revision 1.7  93/01/03  07:29:23  mg
  * function calls, error reporting, printing.
- * 
+ *
  * Revision 1.6  92/12/24  23:33:48  mg
  * frames support
- * 
+ *
  * Revision 1.5  92/10/19  15:06:35  mg
  * *** empty log message ***
- * 
+ *
  * Revision 1.4  92/10/14  02:04:35  mg
  * misc
- * 
+ *
  * Revision 1.3  92/09/16  11:04:16  mg
  * *** empty log message ***
- * 
+ *
  * Revision 1.2  92/09/15  05:54:56  mg
- * cosmetics and new ops: 
+ * cosmetics and new ops:
  * generic '.' and '_'  support. x@y. '..x' and 'x..'.  while(), for(), ?:
- * 
+ *
  */
 
 #include "duel.h"
@@ -59,16 +59,16 @@
 
 #define DOT_STACK_SIZE 100    /* dot stack size, maximum no. of dots in stmt */
 
-/* the scope eval stack. 
+/* the scope eval stack.
  * used for several purposes: to push _'s values (=>), to push structs
  * and unions for x.y and x->y, and to push func/frame values fro frame(i).x
  * and func.x/
  * realv is the real value for the left side operand. It is used for '_'.
  * fieldv is the one to be used to fetch actual names. either:
- * fieldv=realv (for x.y, frame(i).y), fieldv=*realv (for x->y), 
+ * fieldv=realv (for x.y, frame(i).y), fieldv=*realv (for x->y),
  * fieldv=func_frame(realv) (for func.x), or fieldv=0  (x=>y).
  */
-struct { 
+struct {
     tvalue *realv ;     /* actual value for x in x.y or x->y etc. used for _ */
     tvalue *fieldv;     /* value to use for fetching fields, *realv for x->y */
   } dot_stack[DOT_STACK_SIZE] ;
@@ -98,7 +98,7 @@ LFUNC bool find_dot_name(char *name,tvalue *v,bool top_only)
            name[1]=='_' && i==dot_stack_top-1 && name[2]==0 ||     /* __ */
            name[1]=='0'+dot_stack_top-i && name[2]==0) {           /* _[0-9] */
             *v = *x ;
-            return TRUE ; 
+            return TRUE ;
         }
         x=dot_stack[i].fieldv;
         if(!x) continue ;
@@ -198,8 +198,8 @@ LFUNC bool pop_val(tval_list *l,tvalue *v)
   return(TRUE);
 }
 /* compute the symbolic value of one iteration of a search (eg -->) operator.
- * Normally, for (x) and (y) the result x->y  is returned. 
- * But, if x === a-->next[[n]] and y === next, then we 
+ * Normally, for (x) and (y) the result x->y  is returned.
+ * But, if x === a-->next[[n]] and y === next, then we
  * return a-->next[[m]] where m=n+1.
  * Also, instead of returning x->y we return x-->y[[1]]
  *
@@ -209,17 +209,17 @@ LFUNC bool pop_val(tval_list *l,tvalue *v)
 
 LPROC set_search_symb_val(char *opcode,tvalue *xval,tvalue *yval)
 {
-    char *x = xval->symb_val ; 
+    char *x = xval->symb_val ;
     char *y = yval->symb_val ;
     int i,opl=strlen(opcode),xl=strlen(x),yl=strlen(y) ;
     char s[3*VALUE_MAX_SYMBOLIC_SIZE];
 
-    if(yl+2<xl && strcmp(x+xl-yl,y)==0 && x[xl-yl-2]=='-' && x[xl-yl-1]=='>') 
+    if(yl+2<xl && strcmp(x+xl-yl,y)==0 && x[xl-yl-2]=='-' && x[xl-yl-1]=='>')
         sprintf(s,"%-.*s%s%s[[2]]",xl-yl-2,x,opcode,y);
     else {
     for(i=xl-1 ; i>0  ; i--)            /* see if we have op in x */
         if(strncmp(&x[i],opcode,opl)==0) break ;
-    if(i>0 && strncmp(&x[i+opl],y,yl)==0 && 
+    if(i>0 && strncmp(&x[i+opl],y,yl)==0 &&
        x[i+opl+yl]=='[' && x[i+opl+yl+1]=='[' && x[xl-2]==']' && x[xl-1]==']'){
         /* x seems to be something like  head-->next[1] */
         int j,val=0 ;
@@ -240,7 +240,7 @@ simple:         /* we failed to find a x-->y[z] pattern, make new one */
 
 LPROC push_dot_stack(tvalue *realv,tvalue *fieldv)
 {
-   if(dot_stack_top==DOT_STACK_SIZE) 
+   if(dot_stack_top==DOT_STACK_SIZE)
        duel_gen_error("expression too complex ('.' and '->' levels)",0);
    dot_stack[++dot_stack_top].realv=realv ;
    dot_stack[dot_stack_top].fieldv=fieldv ;
@@ -252,7 +252,7 @@ LPROC pop_dot_stack(void)
    dot_stack_top-- ;
 }
 
-/* a simple fetch of a field. used mainly when printing 
+/* a simple fetch of a field. used mainly when printing
  * v must be a struct with the given name field. value is returned in ret.
  * return false if name not found.
  */
@@ -266,7 +266,7 @@ FUNC bool duel_get_dot_name(tvalue *v,char *name,tvalue *ret)
     return ok ;
 }
 
-/* evaluate x.y and similar "with" operators. Special care when y is a 
+/* evaluate x.y and similar "with" operators. Special care when y is a
  * name and not an expression -- force y to be a direct field of x.
  * y is the 'y' node. v is value to return. op is opcode for error reports
  * (rv,fv) are values to push on the dot stack. rv is the real 'x' value,
@@ -304,7 +304,7 @@ LFUNC bool eval_dot(tnode *y,tvalue *v,char *op,tvalue *rv,tvalue *fv)
  * out: poped x which is marked.
 
  * BFS: init by pushing(x)
- * Iterate: get first(x), 
+ * Iterate: get first(x),
  *      compute all x->y and put into queue.
  *      return x.
  */
@@ -314,7 +314,7 @@ LFUNC bool eval_dot(tnode *y,tvalue *v,char *op,tvalue *rv,tvalue *fv)
  * note: the results from x->y are reversed when pushed on the list,
  * this is so x-->(left,right) would return the left first (put last on
  * the stack, even though it is computed first!)
- * malloc problem: newl is kept locally, so in case of ^C while here, mem 
+ * malloc problem: newl is kept locally, so in case of ^C while here, mem
  * it points to will be lost. Normally only a few values
  */
 
@@ -337,10 +337,10 @@ LFUNC bool get_next_dfs_val(tval_list *l, tnode *y,tvalue *v)
 }
 
 
-/* stop the evaluation of the expression at node n. 
+/* stop the evaluation of the expression at node n.
  * useful with operators like first().
  * each node keeps an internal state allowing it to produce the next value.
- * this function resets those states. 
+ * this function resets those states.
  *
  * How: the internal state is kept in n->eval.level. we reset level to zero
  *      for the node and the subnodes. if the level is already zero,
@@ -352,7 +352,7 @@ LPROC stop_eval(tnode *n)
 {
    int i;
    if(n==NULL || n->eval.level==0) return ; /* done! subnodes are also ok */
-   n->eval.level=0 ; 
+   n->eval.level=0 ;
    for(i=0 ; i<NODE_MAX_KIDS ; i++) stop_eval(n->kids[i]);
 }
 
@@ -360,7 +360,7 @@ LPROC stop_eval(tnode *n)
  * with the top node for the parms. Parms are parsed as "," operators.
  * the function leaves the computed values "hanging" on v1 of each "," node.
  * the last paramater is left at v2 of the function call itself (there isnt
- * any other reasonable place!). 
+ * any other reasonable place!).
  * 2nd paramater is the function call node, used for the last paramater.
  */
 
@@ -377,7 +377,7 @@ LFUNC bool eval_func_parms(tnode *n,tnode *fn)
    }
    else if(!duel_eval(n,p = &fn->eval.v2)) return FALSE;  /* last paramater */
 ok:
-   duel_standardize_func_parm(p); 
+   duel_standardize_func_parm(p);
    return TRUE ;
 }
 
@@ -418,7 +418,7 @@ again:
    duel_target_func_call(f,parms,parms_no,v);
    if(f->ctype->u.kid->type_kind==CTK_VOID) goto again ; /* no return vals */
    duel_set_symb_val(v,"%s(",f,0);
-   for(i=0 ; i<parms_no ; i++) 
+   for(i=0 ; i<parms_no ; i++)
       duel_set_symb_val(v,"%s%s,",v,parms[i]);
    if(parms_no>0) v->symb_val[strlen(v->symb_val)-1]='\0' ; /*chop ',' tail*/
    strcat(v->symb_val,")");
@@ -451,7 +451,7 @@ LFUNC bool duel_eval_sbin(tnode *n,tvalue *v)
            duel_set_alias(kid0->name,v);
    break ;
    case OP_DEF:
-           if(kid0->node_kind!=NK_NAME) 
+           if(kid0->node_kind!=NK_NAME)
                 duel_gen_error("left side of := must be a simple var",0);
            if(!duel_eval(kid1,v)) return FALSE ;
            duel_set_alias(kid0->name,v);
@@ -460,15 +460,15 @@ LFUNC bool duel_eval_sbin(tnode *n,tvalue *v)
          if(lev==1 && duel_eval(kid0,v)) return TRUE ;
          lev=2 ;
          return duel_eval(kid1,v);
-   case ';':  
-         /*note: (x;) is not allowed in syntax, but is allowed here and 
+   case ';':
+         /*note: (x;) is not allowed in syntax, but is allowed here and
           *means eval x, return nothing. used by parser, e.g. terminating ';'
-          *produces no side effects 
+          *produces no side effects
           */
 
          if(lev==1) while(duel_eval(kid0,v)) ; /* eval all left size */
          lev=2 ;
-         return duel_eval(kid1,v); 
+         return duel_eval(kid1,v);
    break ;
    case OP_IMP:  /* a=>b  for each _=eval(a) return eval(b) (with _ set) */
              if(lev>1) goto im2 ;
@@ -510,12 +510,12 @@ LFUNC bool duel_eval_sbin(tnode *n,tvalue *v)
                     return TRUE ;
                   }
              }
-   case '.':  
+   case '.':
              if(lev>1) goto dt2 ;
              for(;;) {
                   if(!duel_eval(kid0,v1)) return FALSE ;
                   *v2 = * v1 ;  /* copy value for the lookup */
-                  if(ctype_kind_func_ptr_like(v1->ctype))  /* func.x */ 
+                  if(ctype_kind_func_ptr_like(v1->ctype))  /* func.x */
                       duel_find_func_frame(v2,"x.y");
                   else
                   if(v1->val_kind!=VK_FVALUE)  /* type check frame or struct*/
@@ -523,7 +523,7 @@ LFUNC bool duel_eval_sbin(tnode *n,tvalue *v)
                   lev=2 ;
              dt2: if(!eval_dot(kid1,v,".",v1,v2)) continue ;
                   if(v->ctype!=v1->ctype || v->val_kind!=v1->val_kind ||
-		     v->u.lvalue != v1->u.lvalue || 
+                     v->u.lvalue != v1->u.lvalue ||
                      strcmp(v->symb_val,v1->symb_val)!=0) /* check for x._ */
                       duel_set_symb_val(v,"%s.%s",v1,v);
                   return TRUE ;
@@ -537,7 +537,7 @@ LFUNC bool duel_eval_sbin(tnode *n,tvalue *v)
                   lev=2 ;
              ar2: if(!eval_dot(kid1,v,"->",v1,v2)) continue ;
                   if(v->ctype!=v1->ctype || v->val_kind!=v1->val_kind ||
-		     v->u.lvalue != v1->u.lvalue || 
+                     v->u.lvalue != v1->u.lvalue ||
                      strcmp(v->symb_val,v1->symb_val)!=0) /* check for x->_ */
                       duel_set_symb_val(v,"%s->%s",v1,v);
                   return TRUE ;
@@ -569,8 +569,8 @@ LFUNC bool duel_eval_sbin(tnode *n,tvalue *v)
                stop_eval(kid0) ;
                n->eval.counter= -1 ;
            }
-           for( ; n->eval.counter<vi ; n->eval.counter++) 
-               if(!duel_eval(kid0,v)) 
+           for( ; n->eval.counter<vi ; n->eval.counter++)
+               if(!duel_eval(kid0,v))
                    duel_op_error("operator x of y[[x]] too large",0,v1,0);
            return TRUE ; /* value is the last (v) computed */
    break ;
@@ -584,7 +584,7 @@ LFUNC bool duel_eval_sbin(tnode *n,tvalue *v)
                return TRUE ;
            }
            *v1 = *v ;           /* allow fields in y of x@y for x struct ptr */
-           if(ctype_kind_ptr_like(v->ctype) && 
+           if(ctype_kind_ptr_like(v->ctype) &&
               ctype_kind_struct_like(v->ctype->u.kid))
                duel_get_struct_ptr_val(v1,"x@y");
 
@@ -593,10 +593,10 @@ LFUNC bool duel_eval_sbin(tnode *n,tvalue *v)
                    stop_eval(kid1);
                    return TRUE ;
                }
-           stop_eval(kid0); 
+           stop_eval(kid0);
     break ;
     case '#':            /* x#i define variable i as counter for gen. x*/
-       if(kid1->node_kind!=NK_NAME) 
+       if(kid1->node_kind!=NK_NAME)
                duel_gen_error("x#y 2rd operand must be a name",0);
        if(!duel_eval(kid0,v)) return FALSE ;
        if(lev==1) { lev=2 ; n->eval.counter= -1 ; } /* first time */
@@ -717,9 +717,9 @@ FUNC bool duel_eval(tnode *n,tvalue *v)
              if(n->op=='#') {
                  int count=0 ;
                  if(n->eval.level==1) {
-                     while(duel_eval(n->kids[0],&u)) 
-		       if(count++ == 0) duel_set_symb_val(v,"#/(%s ...)",&u,0);
-		     if(count == 0) duel_set_symb_val(v,"#/(empty)",0,0);
+                     while(duel_eval(n->kids[0],&u))
+                       if(count++ == 0) duel_set_symb_val(v,"#/(%s ...)",&u,0);
+                     if(count == 0) duel_set_symb_val(v,"#/(empty)",0,0);
                      v->val_kind=VK_RVALUE ;
                      v->ctype=ctype_int ;
                      v->u.rval_int=count ;
@@ -727,7 +727,7 @@ FUNC bool duel_eval(tnode *n,tvalue *v)
                      ok=TRUE ;
                  }
              }
-             else 
+             else
              if(n->op==OP_AND) {
                  if(n->eval.level==1) { int result=1 ;
                      while(duel_eval(n->kids[0],v)) {
@@ -745,7 +745,7 @@ FUNC bool duel_eval(tnode *n,tvalue *v)
                      ok=TRUE ;
                  }
              }
-             else 
+             else
              if(n->op==OP_OR) {
                  if(n->eval.level==1) { int result=0 ;
                      while(duel_eval(n->kids[0],v)) {
@@ -763,17 +763,17 @@ FUNC bool duel_eval(tnode *n,tvalue *v)
                      ok=TRUE ;
                  }
              }
-             else 
+             else
              if(n->op==OP_SIZ) {
                  if(n->eval.level==1) {
-		     char *tname=n->kids[0]->ctype->name ;
+                     char *tname=n->kids[0]->ctype->name ;
                      duel_assert(n->kids[0]->node_kind==NK_CTYPE);
                      v->val_kind=VK_RVALUE ;
                      v->ctype=ctype_size_t ;
                      v->u.rval_size_t=n->kids[0]->ctype->size ;
-                     n->eval.level=2 ; 
-		     if(tname==NULL || *tname=='\0') tname="T" ; /* cheating */
-		     sprintf(v->symb_val,"sizeof(%s)",tname);
+                     n->eval.level=2 ;
+                     if(tname==NULL || *tname=='\0') tname="T" ; /* cheating */
+                     sprintf(v->symb_val,"sizeof(%s)",tname);
                      ok=TRUE ;
                  }
              }
@@ -803,10 +803,10 @@ FUNC bool duel_eval(tnode *n,tvalue *v)
           case OPK_SBIN:   /* a,b etc, special ops */
              ok=duel_eval_sbin(n,v) ;
           break ;
-          case OPK_TRI: 
+          case OPK_TRI:
              ok=duel_eval_tri(n,v) ;
           break ;
-          case OPK_QUAD: 
+          case OPK_QUAD:
              ok=duel_eval_quad(n,v) ;
           break ;
           case OPK_CAST:
@@ -815,9 +815,9 @@ FUNC bool duel_eval(tnode *n,tvalue *v)
              duel_do_cast(n->kids[0]->ctype,v);
              ok=TRUE ;
           break ;
-          case OPK_ASSIGN: 
+          case OPK_ASSIGN:
              duel_gen_error("modified assignment is not supported yet",0);
-          case OPK_FUNC: 
+          case OPK_FUNC:
              ok=eval_func_call(n,v) ;
           break ;
           default: duel_assert(0);
@@ -830,5 +830,3 @@ done:
    duel_set_eval_loc(prev_loc);
    return ok ;
 }
-
-

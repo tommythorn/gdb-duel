@@ -1,6 +1,6 @@
 %{
 /*   DUEL - A Very High Level Debugging Langauge.  */
-/*   Public domain code			           */
+/*   Public domain code                            */
 /*   Written by Michael Golan mg@cs.princeton.edu  */
 /*$Header: /tmp_mnt/n/fs/grad2/mg/duel/RCS/parse.y,v 1.14 93/03/17 11:04:12 mg Exp $*/
 
@@ -9,9 +9,9 @@
  * the parsing generate an AST with essentially no type checking.
  * names are only looked up when the refer explicitly to types. This forces
  * the use of "T" before user types. You can't parse (x)(y) correctly, if
- * you want the node to contain "cast" or "func", without knowing the x is 
+ * you want the node to contain "cast" or "func", without knowing the x is
  * not a type. (It is interesting to note that (x *)(y) is clearly a cast,
- * but it can not be parsed without a context sensitive grammer!). 
+ * but it can not be parsed without a context sensitive grammer!).
  *
  * Version 1.1 now accept (x) as a type cast, so (print)("hi") fails, but
  * (uint)z is ok. Also accepted is (uint*)z. T is still required in sizeof
@@ -33,10 +33,10 @@
  */
 
 /*
- * $Log:	parse.y,v $
+ * $Log:        parse.y,v $
  * Revision 1.14  93/03/17  11:04:12  mg
- * fixed (t*)x bug, was parsed as (t**)x 
- * 
+ * fixed (t*)x bug, was parsed as (t**)x
+ *
  * Revision 1.13  93/03/12  06:15:09  mg
  * modified unary's a bit - cosmetics
  * support (x)y as type cast
@@ -44,79 +44,79 @@
  * replace sizeof exp  with sizeof(exp) to prevent clash with above
  * more cosmetics, including yyerror abort, tuint for uint.
  * takes anything after |> to be comment (pipe command really)
- * 
- * 
+ *
+ *
  * Revision 1.12  93/02/27  06:06:09  mg
  * added signed char parsing.
- * 
+ *
  * Revision 1.11  93/02/23  19:15:38  mg
  * improved escaped char support
- * 
+ *
  * Revision 1.10  93/02/03  21:49:34  mg
  * bug fix - yyerror calls now abort parsing (eg called from lex)
- * 
+ *
  * Revision 1.9  93/01/12  21:53:07  mg
  * cleanup and set for release
- * 
+ *
  * Revision 1.8  93/01/07  00:14:33  mg
  * add &&/ ||/
  * fixed parsing of trailing ';' was a mess.
  * ignore ';' before 'else' and '}' w/warning.
- * 
+ *
  * Revision 1.7  93/01/03  07:31:01  mg
  * error reporting
- * 
+ *
  * Revision 1.6  92/12/24  23:35:50  mg
  * began src pos support
- * 
+ *
  * Revision 1.5  92/10/19  15:08:02  mg
  * frames() added; bug fixed
- * 
+ *
  * Revision 1.4  92/10/14  02:06:32  mg
  * misc/change casting parsing/variable def.
- * 
+ *
  * Revision 1.3  92/09/16  11:09:39  mg
- * add typedef/struct support, const strings 
+ * add typedef/struct support, const strings
  * cleanup s/r conflict by setting ELSE to a token. explained some stuff in
  * comments.
- * 
+ *
  * Revision 1.2  92/09/15  06:10:46  mg
  * cosmetics and new ops: x@y, for() while() ..x and x..
  * generic '.' and '_'  support. x@y. '..x' and 'x..'.  while(), for(), ?:
- * 
+ *
  */
 
 #include "duel.h"
 
-static char *inputstr ;		/* pointer to string being parsed */
+static char *inputstr ;         /* pointer to string being parsed */
 static char *lexptr ;           /* current lexer pointer into input str */
-static tnode *root ;		/* result of parsing stored here */
+static tnode *root ;            /* result of parsing stored here */
 
 /* pick unique names for globals of yacc. gdb has other parsers! */
-#define	yyparse	duel_yyparse
-#define	yylex	duel_yylex
-#define	yyerror	duel_yyerror
-#define	yylval	duel_yylval
-#define	yychar	duel_yychar
-#define	yydebug	duel_yydebug
-#define	yypact	duel_yypact	
-#define	yyr1	duel_yyr1			
-#define	yyr2	duel_yyr2			
-#define	yydef	duel_yydef		
-#define	yychk	duel_yychk		
-#define	yypgo	duel_yypgo		
-#define	yyact	duel_yyact		
-#define	yyexca	duel_yyexca
+#define yyparse duel_yyparse
+#define yylex   duel_yylex
+#define yyerror duel_yyerror
+#define yylval  duel_yylval
+#define yychar  duel_yychar
+#define yydebug duel_yydebug
+#define yypact  duel_yypact
+#define yyr1    duel_yyr1
+#define yyr2    duel_yyr2
+#define yydef   duel_yydef
+#define yychk   duel_yychk
+#define yypgo   duel_yypgo
+#define yyact   duel_yyact
+#define yyexca  duel_yyexca
 #define yyerrflag duel_yyerrflag
-#define yynerrs	duel_yynerrs
-#define	yyps	duel_yyps
-#define	yypv	duel_yypv
-#define	yys	duel_yys
-#define	yystate	duel_yystate
-#define	yytmp	duel_yytmp
-#define	yyv	duel_yyv
-#define	yyval	duel_yyval
-#define	yylloc	duel_yylloc
+#define yynerrs duel_yynerrs
+#define yyps    duel_yyps
+#define yypv    duel_yypv
+#define yys     duel_yys
+#define yystate duel_yystate
+#define yytmp   duel_yytmp
+#define yyv     duel_yyv
+#define yyval   duel_yyval
+#define yylloc  duel_yylloc
 
 typedef struct {                /* token info for operators */
         int src_pos ;            /* source position */
@@ -155,7 +155,7 @@ LFUNC tnode* mknode_modified_ctype(tctype *base);
 
 static tctype *decl_tbase ; /* used for variables decl */
 
-/* #define	YYDEBUG	1 */
+/* #define      YYDEBUG 1 */
 
 %}
 
@@ -167,9 +167,9 @@ static tctype *decl_tbase ; /* used for variables decl */
     topinfo opinfo;                 /* keyword/operator + source position    */
   }
 
-%type  <node>   start duel_inp duel_exp exp type nameexp sm_exp oexp  
+%type  <node>   start duel_inp duel_exp exp type nameexp sm_exp oexp
 %type  <node>   all_decls vars_decl var_decl name_decl1 name_decl
-%type  <ctype>  typebase 
+%type  <ctype>  typebase
 %type  <nameinfo>   name
 
 %token <node>   T_CONST
@@ -180,9 +180,9 @@ static tctype *decl_tbase ; /* used for variables decl */
 %token <opinfo> T_CHAR T_INT T_SHORT T_LONG  T_UNSIGNED T_FLOAT T_DOUBLE T_VOID
 %token <opinfo> T_STRUCT T_UNION T_ENUM T_SIZEOF T_TYPEDEF_INDICATOR T_SIGNED
 
-%token <opinfo> T_IF T_ELSE T_FOR T_WHILE 
+%token <opinfo> T_IF T_ELSE T_FOR T_WHILE
 %token <opinfo> ';' ',' '=' '?' '|' '^' '&' '<' '>' '+' '-' '*' '/' '%'
-%token <opinfo> '.' '[' ']' '(' ')' '{' '}' '#' '@' '!' '~' 
+%token <opinfo> '.' '[' ']' '(' ')' '{' '}' '#' '@' '!' '~'
 %token <opinfo> T_OR T_AND T_RSH T_LSH T_INC T_DEC T_COUNT T_FRAME T_TO
 %token <opinfo> T_DFS T_BFS T_ARROW T_OSEL T_CSEL T_IMP T_ANDL T_ORL
 %token <opinfo> T_EQ T_NE T_EQQ T_NEQ T_LE T_GE T_LSQ T_GTQ T_LEQ T_GEQ
@@ -205,22 +205,22 @@ static tctype *decl_tbase ; /* used for variables decl */
 %left  '+' '-'
 %left  '*' '/' '%'
 %right UNARY '!' '~' T_INC T_DEC T_COUNT T_FRAME
-%left T_DFS T_BFS T_POS T_ARROW '.' '[' ']' '(' ')' '{' '}' '#' '@' T_OSEL T_CSEL 
+%left T_DFS T_BFS T_POS T_ARROW '.' '[' ']' '(' ')' '{' '}' '#' '@' T_OSEL T_CSEL
 %%
 
 start : duel_inp     { root=$1 ; }
       ;
 
-duel_inp : all_decls 
+duel_inp : all_decls
          | all_decls ';'
-         | all_decls ';' duel_exp	{ $$=mknode_sbin($2,$1,$3);}
+         | all_decls ';' duel_exp       { $$=mknode_sbin($2,$1,$3);}
          | duel_exp
          ;
 duel_exp : sm_exp
          | sm_exp ';' { $$=mknode_sbin($2,$1,0); }
          ;
-all_decls:  vars_decl			      
-          | all_decls ';' vars_decl  	{ $$=mknode_sbin($2,$1,$3); }
+all_decls:  vars_decl
+          | all_decls ';' vars_decl     { $$=mknode_sbin($2,$1,$3); }
           ;
 
 vars_decl: typebase { decl_tbase=$1 ; } var_decl { $$=$3 ; }
@@ -229,41 +229,41 @@ var_decl : name_decl1
          | var_decl ',' name_decl1  { $$=mknode_sbin(seq_op,$1,$3); }
          ;
 
-name_decl1: name_decl	    { $$=mknode_sbin(decl_op,$1,
- 				   mknode_modified_ctype(decl_tbase)); }
+name_decl1: name_decl       { $$=mknode_sbin(decl_op,$1,
+                                   mknode_modified_ctype(decl_tbase)); }
           ;
 
-name_decl : '(' name_decl ')'		   { $$=$2 ; }
-	  | '(' name_decl ')' '(' ')'	   { $$=$2 ; push_type('('); }
-	  | '*' name_decl	           { $$=$2 ; push_type('*'); }
-	  | name_decl '[' T_CONST ']' 	   { $$=$1 ; push_type_int('[',$3); }
-	  | nameexp
-	  ;
+name_decl : '(' name_decl ')'              { $$=$2 ; }
+          | '(' name_decl ')' '(' ')'      { $$=$2 ; push_type('('); }
+          | '*' name_decl                  { $$=$2 ; push_type('*'); }
+          | name_decl '[' T_CONST ']'      { $$=$1 ; push_type_int('[',$3); }
+          | nameexp
+          ;
 
 /* Statements   - not really, these are expressions too!
-   Notes: for(;;) oexp - will create lots of shift/reduce conflicts, 
+   Notes: for(;;) oexp - will create lots of shift/reduce conflicts,
                         'for(;;;)' and 'for(;;) exp' are specified
-			instead and yacc handle this as a "standard" s/r.
-			the only diff is yacc dont complain on these!
-	   if() - same comments as above, plus, we prevent meaningless
-	          if's like in C: ' if(x); else;' - a useless statement.
+                        instead and yacc handle this as a "standard" s/r.
+                        the only diff is yacc dont complain on these!
+           if() - same comments as above, plus, we prevent meaningless
+                  if's like in C: ' if(x); else;' - a useless statement.
  */
 exp   :   T_IF '(' exp ')' exp %prec STMT { $$=mknode_tri($1,$3,$5,0); }
-      |   T_IF '(' exp ')' exp T_ELSE %prec STMT 
-                                          { $$=mknode_tri($1,$3,$5,0); } 
-      |   T_IF '(' exp ')' T_ELSE exp %prec STMT 
-                                          { $$=mknode_tri($1,$3,0,$6); } 
-      |   T_IF '(' exp ')' exp T_ELSE exp %prec STMT 
-                                          { $$=mknode_tri($1,$3,$5,$7); } 
+      |   T_IF '(' exp ')' exp T_ELSE %prec STMT
+                                          { $$=mknode_tri($1,$3,$5,0); }
+      |   T_IF '(' exp ')' T_ELSE exp %prec STMT
+                                          { $$=mknode_tri($1,$3,0,$6); }
+      |   T_IF '(' exp ')' exp T_ELSE exp %prec STMT
+                                          { $$=mknode_tri($1,$3,$5,$7); }
 
       |   T_FOR '(' oexp ';' exp ';' oexp ')' exp %prec STMT
-                              {  $$=mknode_op(OPK_QUAD,$1,$3,$5,$7,$9); } 
+                              {  $$=mknode_op(OPK_QUAD,$1,$3,$5,$7,$9); }
       |   T_FOR '(' oexp ';' exp ';' oexp ')' %prec STMT
-                              {  $$=mknode_op(OPK_QUAD,$1,$3,$5,$7,0); } 
+                              {  $$=mknode_op(OPK_QUAD,$1,$3,$5,$7,0); }
       |   T_WHILE '(' exp ')' exp %prec STMT
-                              {  $$=mknode_sbin($1,$3,$5); } 
+                              {  $$=mknode_sbin($1,$3,$5); }
       |   T_WHILE '(' exp ')' %prec STMT
-                              {  $$=mknode_sbin($1,$3,0); } 
+                              {  $$=mknode_sbin($1,$3,0); }
       ;
 
 /* Expressions  */
@@ -271,17 +271,17 @@ exp   :   T_IF '(' exp ')' exp %prec STMT { $$=mknode_tri($1,$3,$5,0); }
 exp   :      '*' exp          %prec UNARY  { $$=mknode_unary( $1,$2); }
       |      '&' exp          %prec UNARY  { $$=mknode_unary( $1,$2); }
       |      '-' exp          %prec UNARY  { $$=mknode_unary( $1,$2); }
-      |      '!' exp            	   { $$=mknode_unary( $1,$2); }
+      |      '!' exp                       { $$=mknode_unary( $1,$2); }
       |      '~' exp                       { $$=mknode_unary( $1,$2); }
-      |  T_COUNT exp                 	   { $$=mknode_sunary($1,$2); }
-      |   T_ANDL exp	      		   { $$=mknode_sunary($1,$2); }
-      |   T_ORL  exp	      		   { $$=mknode_sunary($1,$2); }
-      |    T_INC exp                  	   { $$=mknode_unary( $1,$2); }
+      |  T_COUNT exp                       { $$=mknode_sunary($1,$2); }
+      |   T_ANDL exp                       { $$=mknode_sunary($1,$2); }
+      |   T_ORL  exp                       { $$=mknode_sunary($1,$2); }
+      |    T_INC exp                       { $$=mknode_unary( $1,$2); }
       |    T_DEC exp                       { $$=mknode_unary( $1,$2); }
       |    exp T_INC                       { $$=mknode_post_unary($2,$1); }
-      |    exp T_DEC                  	   { $$=mknode_post_unary($2,$1); }
-      |	T_SIZEOF '(' type ')'   	   { $$=mknode_sunary($1,$3); }
-      | T_SIZEOF '(' exp  ')'   	   { $$=mknode_unary($1,$3); }
+      |    exp T_DEC                       { $$=mknode_post_unary($2,$1); }
+      | T_SIZEOF '(' type ')'              { $$=mknode_sunary($1,$3); }
+      | T_SIZEOF '(' exp  ')'              { $$=mknode_unary($1,$3); }
       | T_FRAME '(' exp ')'   %prec UNARY  { $$=mknode_unary( $1,$3); }
       ;
 
@@ -303,98 +303,98 @@ exp  :  '(' type ')' exp  %prec UNARY
                                    { $$=mknode_op(OPK_CAST,$1,$2,$4,0,0); }
 /* HACKS to handle the most common cast cases with a typedef, without
  * requiring a 'T'. This code breaks (printf)("hi"), which returns the
- * error "printf not a typedef", but otherwise it works ok. 
+ * error "printf not a typedef", but otherwise it works ok.
  * It might be confusing since "(uint *)p" works but "(uint (*)())p" wont,
  * but it seems that (uint*)p, (uint)x are the most common, and users get
- * confused w/o them. 
+ * confused w/o them.
  * The code below works essentially with context-sensitive parsing!
  * see the hacked %prec for nameexp which prevents yacc s/r warning!
  */
-     |  '(' name ')' exp %prec UNARY { 
+     |  '(' name ')' exp %prec UNARY {
                   tctype *t=duel_get_target_typedef($2.name);
-                  if(t==NULL) yyerror("not a typedef name"); 
+                  if(t==NULL) yyerror("not a typedef name");
                   $$=mknode_op(OPK_CAST,$1,mknode_ctype(t),$4,0,0); }
-     |  '(' name '*' type_mod ')' exp %prec UNARY { 
+     |  '(' name '*' type_mod ')' exp %prec UNARY {
                  tctype *t=duel_get_target_typedef($2.name);
-                 if(t==NULL) yyerror("not a typedef name"); 
+                 if(t==NULL) yyerror("not a typedef name");
                  push_type('*');
                  $$=mknode_op(OPK_CAST,$1,mknode_modified_ctype(t),$6,0,0); }
      ;
 
  /* Bin ops in decreasing precedence order:  */
 
-exp	:      exp  '*'  exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp  '/'  exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp  '%'  exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp  '+'  exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp  '-'  exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp T_LSH exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp T_RSH exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp T_EQ  exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp T_NE  exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp T_EQQ exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp T_NEQ exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp T_LE  exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp T_GE  exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp T_LEQ exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp T_GEQ exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp  '<'  exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp  '>'  exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp T_LSQ exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp T_GTQ exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp  '&'  exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp  '|'  exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp  '^'  exp	{ $$=mknode_bin($2,$1,$3); }
-   	|      exp T_AND exp	{ $$=mknode_sbin($2,$1,$3); }
-   	|      exp T_OR  exp	{ $$=mknode_sbin($2,$1,$3); }
+exp     :      exp  '*'  exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp  '/'  exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp  '%'  exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp  '+'  exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp  '-'  exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp T_LSH exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp T_RSH exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp T_EQ  exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp T_NE  exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp T_EQQ exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp T_NEQ exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp T_LE  exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp T_GE  exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp T_LEQ exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp T_GEQ exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp  '<'  exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp  '>'  exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp T_LSQ exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp T_GTQ exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp  '&'  exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp  '|'  exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp  '^'  exp    { $$=mknode_bin($2,$1,$3); }
+        |      exp T_AND exp    { $$=mknode_sbin($2,$1,$3); }
+        |      exp T_OR  exp    { $$=mknode_sbin($2,$1,$3); }
         ;
 
-exp	:    exp '?' exp ':' exp  %prec '?'
-                	{ $$=mknode_tri($2,$1,$3,$5); }
-	;
-			  
-exp	:    exp   '='    exp  { $$=mknode_bin($2,$1,$3); }
-   	|    exp T_ASSIGN exp  { $$=mknode_op(OPK_ASSIGN,$2, $1,$3,0,0);  }
-   	|nameexp T_DEFVAR exp  { $$=mknode_sbin($2,$1,$3);  }
-	;
+exp     :    exp '?' exp ':' exp  %prec '?'
+                        { $$=mknode_tri($2,$1,$3,$5); }
+        ;
+
+exp     :    exp   '='    exp  { $$=mknode_bin($2,$1,$3); }
+        |    exp T_ASSIGN exp  { $$=mknode_op(OPK_ASSIGN,$2, $1,$3,0,0);  }
+        |nameexp T_DEFVAR exp  { $$=mknode_sbin($2,$1,$3);  }
+        ;
 
      /* generating expressions */
 
-exp	:      exp T_TO  exp   { $$=mknode_sbin($2,$1,$3); }
-        |      T_TO exp	       { $$=mknode_sbin($1, 0,$2); }
+exp     :      exp T_TO  exp   { $$=mknode_sbin($2,$1,$3); }
+        |      T_TO exp        { $$=mknode_sbin($1, 0,$2); }
         |      exp T_TO        { $$=mknode_sbin($2,$1, 0); }
-        |	exp ',' exp    { $$=mknode_sbin($2,$1,$3); }
+        |       exp ',' exp    { $$=mknode_sbin($2,$1,$3); }
         |      exp T_IMP exp   { $$=mknode_sbin($2,$1,$3); }
         ;
 
-sm_exp  :	sm_exp ';' exp { $$=mknode_sbin($2,$1,$3); }
-        |       exp 
-	;
-
-oexp	:	exp		/* optional expression, eg in for() */
-        |			{ $$=0 ; }
+sm_exp  :       sm_exp ';' exp { $$=mknode_sbin($2,$1,$3); }
+        |       exp
         ;
 
-exp	:	T_CONST  ;
-exp	:	nameexp  ;
-               /* convert a string input (name) into an expression. 
-		* precedence of '+' is a hack to make the special case
-		* of (x*)(y) parsed as a cast, without shift/reduce conflict
-		*(this would work the same w/o the '+' but gives warning)
-		*/
-nameexp	:	name %prec '+'    { $$=mknode_name($1) ; } ;
+oexp    :       exp             /* optional expression, eg in for() */
+        |                       { $$=0 ; }
+        ;
 
-type	:	typebase type_mod { $$=mknode_modified_ctype($1); }
+exp     :       T_CONST  ;
+exp     :       nameexp  ;
+               /* convert a string input (name) into an expression.
+                * precedence of '+' is a hack to make the special case
+                * of (x*)(y) parsed as a cast, without shift/reduce conflict
+                *(this would work the same w/o the '+' but gives warning)
+                */
+nameexp :       name %prec '+'    { $$=mknode_name($1) ; } ;
+
+type    :       typebase type_mod { $$=mknode_modified_ctype($1); }
         ;
 /* type_mod has no value. bison warning is meaningless. I cant find a way
  * to shut it up
  */
 type_mod: '(' type_mod ')'
-	| '(' type_mod ')' '(' ')'	   {  push_type('('); }
-	| '*' type_mod	 	           {  push_type('*'); }
-	| type_mod '[' T_CONST ']' 	   {  push_type_int('[',$3); }
-	| 
-	;
+        | '(' type_mod ')' '(' ')'         {  push_type('('); }
+        | '*' type_mod                     {  push_type('*'); }
+        | type_mod '[' T_CONST ']'         {  push_type_int('[',$3); }
+        |
+        ;
 
 
 /* note that names are evaluated at runtime. hence (name)(x) is ambigious
@@ -410,42 +410,42 @@ type_mod: '(' type_mod ')'
  * example: instead of '(list *) x'  use in duel:  '(T list *) x'
  */
 
-typebase:	T_TYPEDEF_INDICATOR name           {
+typebase:       T_TYPEDEF_INDICATOR name           {
                     $$=duel_get_target_typedef($2.name);
-		    if($$==NULL) {
-		       tvalue v;
-		       if(duel_get_target_variable($2.name,-1,&v)) $$=v.ctype;
-		       else  yyerror("not a typedef name"); 
-		    }
-		} 
+                    if($$==NULL) {
+                       tvalue v;
+                       if(duel_get_target_variable($2.name,-1,&v)) $$=v.ctype;
+                       else  yyerror("not a typedef name");
+                    }
+                }
         ;
 
-typebase:	T_CHAR                   { $$ = ctype_char;  }
-	|	T_SIGNED T_CHAR          { $$ = ctype_schar; }
-	|	T_UNSIGNED T_CHAR        { $$ = ctype_uchar; }
-	|	T_INT                    { $$ = ctype_int;   }
-	|	T_UNSIGNED               { $$ = ctype_uint;  }
-	|	T_UNSIGNED T_INT         { $$ = ctype_uint;  }
-	|	T_LONG                   { $$ = ctype_long;  }
-	|	T_LONG T_INT             { $$ = ctype_long;  }
-	|	T_UNSIGNED T_LONG        { $$ = ctype_ulong; }
-	|	T_UNSIGNED T_LONG T_INT  { $$ = ctype_ulong; }
-	|	T_SHORT                  { $$ = ctype_short; }
-        |	T_SHORT T_INT		 { $$ = ctype_short; }
-	|	T_UNSIGNED T_SHORT    	 { $$ = ctype_ushort; }
-	|	T_UNSIGNED T_SHORT T_INT { $$ = ctype_ushort; }
+typebase:       T_CHAR                   { $$ = ctype_char;  }
+        |       T_SIGNED T_CHAR          { $$ = ctype_schar; }
+        |       T_UNSIGNED T_CHAR        { $$ = ctype_uchar; }
+        |       T_INT                    { $$ = ctype_int;   }
+        |       T_UNSIGNED               { $$ = ctype_uint;  }
+        |       T_UNSIGNED T_INT         { $$ = ctype_uint;  }
+        |       T_LONG                   { $$ = ctype_long;  }
+        |       T_LONG T_INT             { $$ = ctype_long;  }
+        |       T_UNSIGNED T_LONG        { $$ = ctype_ulong; }
+        |       T_UNSIGNED T_LONG T_INT  { $$ = ctype_ulong; }
+        |       T_SHORT                  { $$ = ctype_short; }
+        |       T_SHORT T_INT            { $$ = ctype_short; }
+        |       T_UNSIGNED T_SHORT       { $$ = ctype_ushort; }
+        |       T_UNSIGNED T_SHORT T_INT { $$ = ctype_ushort; }
         |       T_FLOAT                  { $$ = ctype_float ; }
         |       T_DOUBLE                 { $$ = ctype_double; }
-        |	T_VOID			 { $$ = ctype_void;   }
-	|	T_STRUCT name
-		   { $$ = duel_get_target_struct_tag($2.name);
-		     if($$==NULL) yyerror("not a struct tag"); }
-	|	T_UNION name
-		   { $$ = duel_get_target_union_tag($2.name);
-		     if($$==NULL) yyerror("not a union tag"); }
-	|	T_ENUM name
-		   { $$ = duel_get_target_enum_tag($2.name);
-		     if($$==NULL) yyerror("not an enum tag"); }
+        |       T_VOID                   { $$ = ctype_void;   }
+        |       T_STRUCT name
+                   { $$ = duel_get_target_struct_tag($2.name);
+                     if($$==NULL) yyerror("not a struct tag"); }
+        |       T_UNION name
+                   { $$ = duel_get_target_union_tag($2.name);
+                     if($$==NULL) yyerror("not a union tag"); }
+        |       T_ENUM name
+                   { $$ = duel_get_target_enum_tag($2.name);
+                     if($$==NULL) yyerror("not an enum tag"); }
         ;
 
 name    : T_SYM ;
@@ -503,14 +503,14 @@ static struct skeyword {  /* all keywords we recognize */
   int token ;                   /* token to return to yacc   */
   topcode opcode ;              /* opcode associated w/keyword */
  } keywords[] = {
-    {"if",	T_IF	   , OP_IF},
-    {"else",	T_ELSE	   },
-    {"for",	T_FOR	   , OP_FOR},
-    {"while",	T_WHILE	   , OP_WHILE},
+    {"if",      T_IF       , OP_IF},
+    {"else",    T_ELSE     },
+    {"for",     T_FOR      , OP_FOR},
+    {"while",   T_WHILE    , OP_WHILE},
     {"sizeof",  T_SIZEOF   , OP_SIZ},
-    {"frame",	T_FRAME	   , OP_FRAME},
+    {"frame",   T_FRAME    , OP_FRAME},
 
-    {"T", 	T_TYPEDEF_INDICATOR  },
+    {"T",       T_TYPEDEF_INDICATOR  },
     {"struct",  T_STRUCT   },
     {"union",   T_UNION    },
     {"enum",    T_ENUM     },
@@ -523,7 +523,7 @@ static struct skeyword {  /* all keywords we recognize */
     {"int",     T_INT      },
     {"double",  T_DOUBLE   },
     {"float",   T_FLOAT    },
-    {"void",	T_VOID	   },
+    {"void",    T_VOID     },
    } ;
 
 
@@ -535,11 +535,11 @@ LFUNC tnode* duel_lex_int(void)    /* parse next token as integer num */
    bool is_l=0,is_u=0 ;
    int base=10 ;
    int src_pos=lexptr-inputstr ;
-   
+
    if(*p=='0') {                        /* figure out the base */
       p++ ;
       if(*p=='x' || *p=='X') base=16,p++ ;
-      else 
+      else
       if(isdigit(*p)) base=8 ; /* avoid having '0' as a base 8 (uint) */
    }
 
@@ -561,17 +561,17 @@ LFUNC tnode* duel_lex_int(void)    /* parse next token as integer num */
    }
    else
    if(is_l || (tuint) val != val) {
-        n=mknode_const(src_pos,ctype_long) ; 
-        n->cnst.u.rval_long=(long) val ; 
+        n=mknode_const(src_pos,ctype_long) ;
+        n->cnst.u.rval_long=(long) val ;
    }
    else
    if(is_u || (int) val < 0) {
-        n=mknode_const(src_pos,ctype_uint) ; 
-        n->cnst.u.rval_uint=(tuint) val ; 
+        n=mknode_const(src_pos,ctype_uint) ;
+        n->cnst.u.rval_uint=(tuint) val ;
    }
    else {
-        n=mknode_const(src_pos,ctype_int) ; 
-        n->cnst.u.rval_int=(int) val ; 
+        n=mknode_const(src_pos,ctype_int) ;
+        n->cnst.u.rval_int=(int) val ;
    }
    strncpyz(n->cnst.symb_val,lexptr,p-lexptr); /* save the symbolic val*/
    lexptr=p ;
@@ -602,15 +602,15 @@ LFUNC tnode* duel_lex_float(void)    /* parse next token as float num */
   *p=tmpc ;
   if(!ok) yyerror("Invalid float constant.");
 
-  n=mknode_const(src_pos,ctype_double); 
-  n->cnst.u.rval_double=val ; 
+  n=mknode_const(src_pos,ctype_double);
+  n->cnst.u.rval_double=val ;
   strncpyz(n->cnst.symb_val,lexptr,p-lexptr); /* save the symbolic val*/
   lexptr=p ;
   return(n);
 }
 
-/* parse_escaped_char -- parse an escaped char (e.g. '\n'). 
- * lexptr expected to point to text right after the '\'. 
+/* parse_escaped_char -- parse an escaped char (e.g. '\n').
+ * lexptr expected to point to text right after the '\'.
  * return: actual char value (e.g. 012 if 'n' or '012' is found.)
  *         lexptr is advanced after the espaced char.
  */
@@ -618,8 +618,8 @@ LFUNC tnode* duel_lex_float(void)    /* parse next token as float num */
 LFUNC char parse_escaped_char(void)
 {
   char retc ;
-  switch(lexptr[0]) { 
-   /*case 'a': retc='\a' ; break ;	/* some compilers don't support it. */
+  switch(lexptr[0]) {
+   /*case 'a': retc='\a' ; break ;      /* some compilers don't support it. */
    case 'b': retc='\b' ; break ;
    case 'f': retc='\f' ; break ;
    case 'n': retc='\n' ; break ;
@@ -627,12 +627,12 @@ LFUNC char parse_escaped_char(void)
    case 't': retc='\t' ; break ;
    case 'v': retc='\v' ; break ;
    case 'x': yyerror("hex char const not yet suppported");
-   case '0': case '1': case '2': case '3': 
-	     retc= lexptr[0] - '0' ;
-	     if(lexptr[1]>='0' && lexptr[1]<='7') 
-		retc= retc* 010 +  *++lexptr - '0' ;
-	     if(lexptr[1]>='0' && lexptr[1]<='7') 
-		retc= retc* 010 +  *++lexptr - '0' ;
+   case '0': case '1': case '2': case '3':
+             retc= lexptr[0] - '0' ;
+             if(lexptr[1]>='0' && lexptr[1]<='7')
+                retc= retc* 010 +  *++lexptr - '0' ;
+             if(lexptr[1]>='0' && lexptr[1]<='7')
+                retc= retc* 010 +  *++lexptr - '0' ;
              break ;
    default:  retc=lexptr[0] ;     /* default also takes care of '\'' '\\' */
   }
@@ -640,7 +640,7 @@ LFUNC char parse_escaped_char(void)
   return retc ;
 }
 
-/* FUNC yylex -- return the next token to yacc. 
+/* FUNC yylex -- return the next token to yacc.
  * GLOBALS: lexptr point to the string we are parsing next. it is updated.
  */
 
@@ -651,17 +651,17 @@ LFUNC int yylex (void)
 
   for(c= *lexptr; c==' ' || c=='\t' || c=='\n' ; c= *++lexptr); /* skip blank*/
 
-  src_pos = lexptr - inputstr ;	/* current char being parsed */
+  src_pos = lexptr - inputstr ; /* current char being parsed */
   yylval.opinfo.src_pos = src_pos ;
 
   if(*lexptr=='\0' || strncmp(lexptr,"|>",2)==0) return 0 ; /* end of expr */
 
-  for (i = 0;  i < sizeof(tokens)/sizeof(struct stoken) ; i++) { 
+  for (i = 0;  i < sizeof(tokens)/sizeof(struct stoken) ; i++) {
     int l=strlen(tokens[i].opstr) ;             /* check next token vs table */
     if(strncmp(lexptr,tokens[i].opstr,l)==0) {
-	lexptr+=l ;
-	yylval.opinfo.opcode = tokens[i].opcode;
-	return tokens[i].token ;
+        lexptr+=l ;
+        yylval.opinfo.opcode = tokens[i].opcode;
+        return tokens[i].token ;
     }
   }
 
@@ -675,17 +675,17 @@ LFUNC int yylex (void)
       yylval.node->cnst.u.rval_int=c ;
       strncpyz(yylval.node->cnst.symb_val,p,lexptr-p); /*save the symbol. val*/
       return T_CONST ;
-    
+
     case '0':                           /* chk hex  */
         if(lexptr[1]=='x' || lexptr[1]=='X') {
-           yylval.node=duel_lex_int(); 
+           yylval.node=duel_lex_int();
            return T_CONST ;
         }
         /* fall thru for other numbers */
     case '1': case '2': case '3':      /* decimal or floating point number */
     case '4': case '5': case '6': case '7': case '8': case '9':
           for(p=lexptr ; *p>='0' && *p<='9' ; p++ ) ;  /*find next non digit*/
-          if(*p=='.' && p[1]!='.' || *p=='e' || *p=='E') 
+          if(*p=='.' && p[1]!='.' || *p=='e' || *p=='E')
                yylval.node=duel_lex_float();
           else yylval.node=duel_lex_int();
           return T_CONST ;
@@ -696,44 +696,44 @@ LFUNC int yylex (void)
     case '{':  case '}':
     case '+':  case '-':  case '*':  case '/':  case '%':
     case '|':  case '&':  case '^':  case '~':  case '!':
-    case ',':  case '?':  case ':':  case '=':  
-    case '.':  case '@':  case '$':  case '#':  case '`': case '\\': 
+    case ',':  case '?':  case ':':  case '=':
+    case '.':  case '@':  case '$':  case '#':  case '`': case '\\':
       lexptr++;
       yylval.opinfo.opcode=c ;
       return c;
     case ';': { /* hack, ignore ';' before '}' and else. for C compatability*/
-	        char *save_lexptr= ++lexptr ;
-		int tok=yylex()	;	/* hack, call myself for next token */
-		if(tok=='}' || tok==T_ELSE) {
-		    duel_printf("warning: useless ';' ignored\n");
-		    return tok ;
-		}
-		/* else restore position and return the ';' */
-		lexptr=save_lexptr ;
-		yylval.opinfo.opcode=';' ;
-		yylval.opinfo.src_pos = src_pos ;
-		return ';';
+                char *save_lexptr= ++lexptr ;
+                int tok=yylex() ;       /* hack, call myself for next token */
+                if(tok=='}' || tok==T_ELSE) {
+                    duel_printf("warning: useless ';' ignored\n");
+                    return tok ;
+                }
+                /* else restore position and return the ';' */
+                lexptr=save_lexptr ;
+                yylval.opinfo.opcode=';' ;
+                yylval.opinfo.src_pos = src_pos ;
+                return ';';
     }
     case '"': {
           char s[512] ;
-	  size_t len=0 ;
-	  ttarget_ptr dptr ;
-	  tnode *n ;
+          size_t len=0 ;
+          ttarget_ptr dptr ;
+          tnode *n ;
 
-	  p=lexptr++ ; 
-	  while((c= *lexptr++)!='"') {
-	       if (c == '\\') c=parse_escaped_char();
-	       s[len++]=c ;
-	  }
-	  s[len++]=0 ;
-	  dptr=duel_alloc_target_space(len);
-	  duel_put_target_bytes(dptr,s,len);
-	  
-	  n=mknode_const(src_pos,ctype_charptr); 
-	  n->cnst.u.rval_ptr=dptr ; 
-	  len=lexptr-p ;
-	  if(len>60) len=60 ;
-	  strncpyz(n->cnst.symb_val,p,len); /* save the symbolic val*/
+          p=lexptr++ ;
+          while((c= *lexptr++)!='"') {
+               if (c == '\\') c=parse_escaped_char();
+               s[len++]=c ;
+          }
+          s[len++]=0 ;
+          dptr=duel_alloc_target_space(len);
+          duel_put_target_bytes(dptr,s,len);
+
+          n=mknode_const(src_pos,ctype_charptr);
+          n->cnst.u.rval_ptr=dptr ;
+          len=lexptr-p ;
+          if(len>60) len=60 ;
+          strncpyz(n->cnst.symb_val,p,len); /* save the symbolic val*/
           yylval.node=n ;
           return T_CONST ;
       }
@@ -744,18 +744,18 @@ LFUNC int yylex (void)
 
   p=lexptr ;
   do { c= *++lexptr ; } while(c=='_' || isalnum(c));
-  
-  for (i = 0;  i < sizeof(keywords)/sizeof(struct skeyword) ; i++) { 
+
+  for (i = 0;  i < sizeof(keywords)/sizeof(struct skeyword) ; i++) {
     int l=strlen(keywords[i].keyword_str) ;   /* check next token vs keywords*/
     if(l==lexptr-p && strncmp(p,keywords[i].keyword_str,l)==0) {
         yylval.opinfo.opcode=keywords[i].opcode ;
-	return keywords[i].token ;
+        return keywords[i].token ;
     }
   }
 
   /* the symbol/name found is not a reserved word, so return it as a T_SYM
    */
-    
+
   i=lexptr-p ;          /* length of string found (symbol/name) */
   yylval.nameinfo.src_pos=src_pos ;
   yylval.nameinfo.name=duel_malloc(i+1);
@@ -769,7 +769,7 @@ LPROC yyerror(char *msg)
   duel_printf("%s\n",inputstr);
   for(i=0 ; i<n ; i++) duel_printf("-");
   duel_printf("^ %s\n",msg);
-  duel_abort();		/* terminate parsing. some callers depend on this*/
+  duel_abort();         /* terminate parsing. some callers depend on this*/
 }
 
 /*************************************************************************/
@@ -795,7 +795,7 @@ LFUNC tnode* mknode_op(top_kind op_kind,topinfo opinfo,
 }
 
 
- /* mknode_const -- make a constant node for the given type. 
+ /* mknode_const -- make a constant node for the given type.
   */
 
 LFUNC tnode* mknode_const(int src_pos,tctype *ctype)
@@ -810,7 +810,7 @@ LFUNC tnode* mknode_const(int src_pos,tctype *ctype)
    return n ;
 }
 
- /* mknode_ctype -- make a node of the given c-type. 
+ /* mknode_ctype -- make a node of the given c-type.
   */
 
 LFUNC tnode* mknode_ctype(tctype *ctype)
@@ -841,13 +841,13 @@ LFUNC tnode* mknode_name(tnameinfo nameinfo)
 /* In order to parse C types, which are 'reversed' in the parser, a stack
  * is used to push abstract declarators, e.g. in (*)() we first push a func
  * indicator '(' and then push a pointer indicator '*'. for arrays we push
- * a '[' and the array size. 
- * This stack is popped and a ctype is constructed at the end of the 
+ * a '[' and the array size.
+ * This stack is popped and a ctype is constructed at the end of the
  * abstract type parsing. The following functions implement the stack
  */
 
 typedef struct stype_desc {  /* stack of type descriptors is made of these */
-        char desc ; 
+        char desc ;
         int size ;
         struct stype_desc *next ;       /* next on stack */
       } ttype_desc ;
@@ -868,10 +868,10 @@ LPROC push_type(char desc)     /* put desc on the types stack */
  *                  is given as a constant node (which is expected to be int)
  */
 
-LPROC push_type_int(char desc,tnode *n)  
+LPROC push_type_int(char desc,tnode *n)
 {
    duel_assert(n->node_kind==NK_CONST);
-   if(n->cnst.ctype != ctype_int || 
+   if(n->cnst.ctype != ctype_int ||
       n->cnst.u.rval_int <=0 ) duel_gen_error("Illegal array size",0);
    push_type(desc);
    top->size=n->cnst.u.rval_int ;
@@ -890,24 +890,24 @@ LFUNC bool pop_type(char *desc,int *size)  /* pop item from stack. */
 
 
 /* abstract type-modifiers were pushed on a stack. Retrieve
- * them (reversed) creating type nodes as we go 
- * input: base type (e.g. 'long'). 
- * returns: node of the modified type. 
+ * them (reversed) creating type nodes as we go
+ * input: base type (e.g. 'long').
+ * returns: node of the modified type.
  * modification is based on the stack of things pushed while parsing.
  */
 
 LFUNC tnode* mknode_modified_ctype(tctype *base)
-{  
+{
     int size;
     char tdesc ;           /* descriptor of abs decl eg '*' */
     tctype *t=base ;       /* type under construction       */
-    
+
     while(pop_type(&tdesc,&size))    /* pop next abs decl    */
-	switch (tdesc) {
-	  case '*':  t=duel_mkctype_ptr(t);         break ;
-	  case '(':  t=duel_mkctype_func(t);        break ;
-	  case '[':  t=duel_mkctype_array(t,size);  break ;
-	}	
+        switch (tdesc) {
+          case '*':  t=duel_mkctype_ptr(t);         break ;
+          case '(':  t=duel_mkctype_func(t);        break ;
+          case '[':  t=duel_mkctype_array(t,size);  break ;
+        }
     return mknode_ctype(t) ;
 }
 
@@ -918,7 +918,7 @@ LFUNC tnode* mknode_modified_ctype(tctype *base)
 FUNC tnode* duel_parse(char *s)
 {
   lexptr=inputstr=s ;
-  top=0 ; 				/* reset the types stack */
+  top=0 ;                               /* reset the types stack */
   if(duel_yyparse()) root=NULL ;
   return root ;
 }

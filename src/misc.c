@@ -6,17 +6,17 @@
 /* misc function/library-like */
 
 /*
- * $Log:	misc.c,v $
+ * $Log:        misc.c,v $
  * Revision 1.5  93/03/12  05:51:00  mg
  * support output redirection
- * 
+ *
  * Revision 1.4  93/01/13  16:22:09  mg
  * allow malloc to return int (is a mini symbol on SUN)
- * 
+ *
  * Revision 1.3  93/01/12  21:52:43  mg
  * moved aliases mgmt here
  * cleanup and set for release
- * 
+ *
  */
 
 #include "duel.h"
@@ -47,9 +47,9 @@ FUNC ttarget_ptr duel_alloc_target_space(size_t n)
   p.u.rval_int=n ;
   parms[0]= &p ;
 
-  if(!duel_get_target_variable("malloc",-1,&f) || 
-     f.ctype->type_kind!=CTK_FUNC || 
-     f.ctype->u.kid->type_kind!=CTK_INT && f.ctype->u.kid->type_kind!=CTK_PTR) 
+  if(!duel_get_target_variable("malloc",-1,&f) ||
+     f.ctype->type_kind!=CTK_FUNC ||
+     f.ctype->u.kid->type_kind!=CTK_INT && f.ctype->u.kid->type_kind!=CTK_PTR)
       duel_fatal("malloc() function returning a pointer required in target");
 
   duel_target_func_call(&f,parms,1,&r);
@@ -73,7 +73,7 @@ PROC duel_free_nodes(tnode *n)
 {
     int i;
     if(!n) return ;
-    for(i=0 ; i<NODE_MAX_KIDS ; i++) 
+    for(i=0 ; i<NODE_MAX_KIDS ; i++)
         duel_free_nodes(n->kids[i]);
     duel_free_val_list(&n->eval.vlist);
     duel_free(n);
@@ -140,6 +140,3 @@ PROC duel_show_aliases(void)
      }
    }
 }
-
-
-

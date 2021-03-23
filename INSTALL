@@ -11,18 +11,18 @@ is supported. However, the code in the distribution contains a self-link
 module which can be used to test duel expressions w/o gdb (useful only
 to verify duel, or if you plan to port or use as a portable debugging tool).
 
-Normally, Duel runs on top of the GNU debugger gdb(1). In order to use it, 
-you must first install gdb. Duel should work with gdb version 4.6 and 
-later. For older versions, some minor changes might be needed to 
+Normally, Duel runs on top of the GNU debugger gdb(1). In order to use it,
+you must first install gdb. Duel should work with gdb version 4.6 and
+later. For older versions, some minor changes might be needed to
 the interface module duelgdb.c. Before duel is installed, unpack
-and compile the regular gdb distribution. The Duel distribution 
+and compile the regular gdb distribution. The Duel distribution
 files should be unpacked in subdirectory 'duel' of
 gdb. Duel is then compiled into the library duel.a. Then, you
 modify the gdb Makefile to include the module duel/duelgdb.c and
 to link with duel/src/duel.a. You also need to modify one source line
 in gdb's code, to change comments to start with '##' instead of '#'.
-If everything goes well, after another 'make' the new gdb executable 
-should support the 'duel' command (alias 'dl').  You can test it by 
+If everything goes well, after another 'make' the new gdb executable
+should support the 'duel' command (alias 'dl').  You can test it by
 running gdb and giving a command like "dl 1..10". There is also
 a test suite.
 
@@ -43,49 +43,49 @@ Note: a more detailed description appears below under DETAILS
 % cd ..
 % make
 % cd gdb
-% gdb		 - check gdb works. try "print 1+2"
+% gdb            - check gdb works. try "print 1+2"
 % mkdir duel
 % cd duel
 % zcat ~/duelgdb/duel.tar | tar xvf -
 % cd src
 % make
-% vi y.tab.c	 - SUN yacc add "char *malloc" which is wrong. remove it
-% make		 - try again
+% vi y.tab.c     - SUN yacc add "char *malloc" which is wrong. remove it
+% make           - try again
 % duelself < tsuite.self > self.out
-% diff tsuite.self.out self.out    	- see diffs. '@xxxx' diffs are ok
-% cd ..					- back to duel
-% cd ..					- up to gdb's src
-% ln -s duel/duelgdb.c .		- could 'mv' instead 
-% vi Makefile	 - add SFILES_MAINDIR=duelgdb.c OBS=duelgdb.o 
-			CLIBS=duel/src/duel.a  CDEPS=duel/src/duel.a
-% vi main.c	 - "else if (c == '#')"  --> "else if (c=='#' && *p1=='#')"
-% rm init.c	 - 'make' will recreate this
+% diff tsuite.self.out self.out         - see diffs. '@xxxx' diffs are ok
+% cd ..                                 - back to duel
+% cd ..                                 - up to gdb's src
+% ln -s duel/duelgdb.c .                - could 'mv' instead
+% vi Makefile    - add SFILES_MAINDIR=duelgdb.c OBS=duelgdb.o
+                        CLIBS=duel/src/duel.a  CDEPS=duel/src/duel.a
+% vi main.c      - "else if (c == '#')"  --> "else if (c=='#' && *p1=='#')"
+% rm init.c      - 'make' will recreate this
 % make
-% gdb		 - test new gdb, with duel
-  gdb> dl 1..4	 - should print 1 2 3 4
+% gdb            - test new gdb, with duel
+  gdb> dl 1..4   - should print 1 2 3 4
 
 % cd duel/src
-% cc -g tsuite.c -o tsuite		- prepare program tsuite.gdb use
-% ../../gdb <tsuite.gdb >gdb.out	- run test suite (takes minutes!)
-% diff gdb.out tsuite.gdb.out gdb.out 	- see diffs '@xxxx' diffs are ok
+% cc -g tsuite.c -o tsuite              - prepare program tsuite.gdb use
+% ../../gdb <tsuite.gdb >gdb.out        - run test suite (takes minutes!)
+% diff gdb.out tsuite.gdb.out gdb.out   - see diffs '@xxxx' diffs are ok
 
 
 DETAILS
 1. Get the gdb distribution, install, configure, compile and test it.
-   The configure script works pretty well, but watch out for weird 
-   utilities in your path (e.g. GNU sed was in my PATH before the 
+   The configure script works pretty well, but watch out for weird
+   utilities in your path (e.g. GNU sed was in my PATH before the
    standard sed. It was incompatible and caused lots of trouble).
    Most common use is ./configure sparc or ./configure decstation
-   and then just "make". 
+   and then just "make".
 
-   SUN SPARC, SunOS4.1.x/Solaris 1.x: use gcc on SUN, since duel uses 
-   prototypes and SUN's pre-ANSI cc can't handle them. Change gdb/Makefile: 
-   from GCC=gcc to CC=gcc, but note the warnings about the ioctrl in the 
-   makefile (I had no problems with gcc 2.1; I am not sure what these 
+   SUN SPARC, SunOS4.1.x/Solaris 1.x: use gcc on SUN, since duel uses
+   prototypes and SUN's pre-ANSI cc can't handle them. Change gdb/Makefile:
+   from GCC=gcc to CC=gcc, but note the warnings about the ioctrl in the
+   makefile (I had no problems with gcc 2.1; I am not sure what these
    warnings imply).
 
-   SPARC, Solaris 2.x: no problems expected. Compiled ok with Sun 
-   		       unbundled SPARCompiler C 2.0.1.
+   SPARC, Solaris 2.x: no problems expected. Compiled ok with Sun
+                       unbundled SPARCompiler C 2.0.1.
 
    SGI iris machines: use ./configure iris4. Note that gdb is broken on
    the irises (can't write to the target), so it cripples the use of duel
@@ -101,37 +101,37 @@ DETAILS
    the -O flag if the gdb test-suite fails on calls to e.g. printf())
 
    HP9000: gcc (2.2.2?) can't compile gdb right now, hopefully soon; For now,
-	   you should use "CC=cc -Aa", and fix gdb's ANSI C problems: 
-	   in gdb/value.h & gdb/expression.h, change "#ifdef __STDC__"
-	   to "#if defined(__STDC__) && !defined(__hppa)".
+           you should use "CC=cc -Aa", and fix gdb's ANSI C problems:
+           in gdb/value.h & gdb/expression.h, change "#ifdef __STDC__"
+           to "#if defined(__STDC__) && !defined(__hppa)".
 
    System V: there is no 'ranlib' and it is not needed to build duel.a
-	     modifiy the src/Makefile for RANLIB=echo.
-	     printf() does not recognize "%p" for pointers. run the following:
-	     mv print.c print.old; sed 's/%p/%08x/' print.old >print.c
+             modifiy the src/Makefile for RANLIB=echo.
+             printf() does not recognize "%p" for pointers. run the following:
+             mv print.c print.old; sed 's/%p/%08x/' print.old >print.c
 
    OS/2: duel works fine with gdb/gcc "emx 0.8f" under OS/2 !
 
-   Other machines: you should test gdb's ability to allocate and write into 
+   Other machines: you should test gdb's ability to allocate and write into
    the target's memory. Compile tsuite.c and start it under gdb (single step
-   twice). Now, enter the command 
-	gdb> print "test"
+   twice). Now, enter the command
+        gdb> print "test"
    If it fails, gdb can not find "malloc", can't call it, or can't write
    to the target's memory; duel will be limited in functionality.
-   
+
 
 2. Unpack the duel source code into a subdirectory 'duel' of gdb.
    DO NOT unpack it in the gdb directory, since duel source files
    like eval.c will clash with gdb source files. The gdb directory
    is the one that contains files like 'values.c', 'valops.c'.
    e.g.  cd gdb-4.8/gdb ; mkdir duel ; cd duel ; zcat ~/duel.tar.Z |tar xvf -
-    
-3. In gdb/duel/src, run make. This compiles the Duel source code into 
+
+3. In gdb/duel/src, run make. This compiles the Duel source code into
    duel.a, to be later linked with gdb. The makefile is pretty
    simple. You can used either cc or gcc, but it must support ANSI
-   prototypes. All system include files are in duel.h. 
+   prototypes. All system include files are in duel.h.
    On SUN machines, you must use gcc (cc doesn't support prototypes)
-   you will need to modify y.tab.c, because it declares malloc 
+   you will need to modify y.tab.c, because it declares malloc
    incorrectly (first line in the file, delete it)
 
    The program duelself will also be created (A stand-alone duel code
@@ -154,7 +154,7 @@ DETAILS
    and might require a total recompile). If you only going to
    compile duel once, and you already compiled gdb, I suggest
    you just modify the Makefile.
-   
+
    A. Locate the SFILES_MAINDIR = macro. add duelgdb.c
    B. Locate OBS = macro. add duelgdb.o
    C. Locate CLIBS = macro. add duel/src/duel.a
@@ -163,7 +163,7 @@ DETAILS
 
    Normally, duel.out contains all the "dl" commands you used (only the
    user input). I would appreciate it if you mail me such output so I can
-   see how you use Duel. You can avoid this file by compiling with 
+   see how you use Duel. You can avoid this file by compiling with
    -DNO_DUEL_OUT (added to CFLAGS in the makefile).
 
 7. Modify gdb's comments to start with '##' instead of '#', since
@@ -173,13 +173,13 @@ DETAILS
    modify to "else if (c == '#' && *p1 == '#')"
 
 8. In gdb's directory, remove init.c (make creates it automatically)
-   and run make. The new gdb binary should support the duel (alias dl) 
+   and run make. The new gdb binary should support the duel (alias dl)
    commands. You can test it by running gdb
    and trying 'dl 1..10' which should print the numbers from 1 to 10.
    A test suite tsuite.gdb is in duel/src. to use, first compile
    tsuite.c, cc -g tsuite.c -o tsuite, then run gdb <tsuite.gdb >gdb.out
-   (can take several minutes) and compare the output to tsuite.gdb.out. 
-   Again, beware that there are intentional errors in the test suite, and 
+   (can take several minutes) and compare the output to tsuite.gdb.out.
+   Again, beware that there are intentional errors in the test suite, and
    that output of addresses/pointer is likely to differ e.g. these are OK:
    45c45
    < x+5 = @10014014
@@ -192,11 +192,11 @@ DETAILS
    (2) if the compiled gdb seems not to have a "dl" command at all, the
    problem is likely  a faulty 'munch' program, part of gdb's makefile
    process to create init.c. Make sure init.c calls _initialized_duel();
-   if not, delete init.c and run make again. Check that munch, a shell 
+   if not, delete init.c and run make again. Check that munch, a shell
    script, uses a non-buggy 'sed' program.
 
 9. Install the new gdb as "duel" instead of "gdb". Also install the
-   manual page duel/duel.1. Finally, let me know that are using it! 
+   manual page duel/duel.1. Finally, let me know that are using it!
    Send email to mg@cs.princeton.edu. All comments are welcome!
 
 WHY SO MANY STEPS?
@@ -206,4 +206,3 @@ this protects you from being GNU-ized if you only want the duel code.
 
 Michael Golan
 mg@cs.princeton.edu
-

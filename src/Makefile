@@ -7,22 +7,22 @@
 
 # NOTE:
 # for sunOS4.x you must use gcc or another ANSI compiler. cc doesnt
-# support prototypes! 
+# support prototypes!
 # Also for sunOS4.x, yacc inserts a declaration of malloc() at the first line
 # of y.tab.c, which is WRONG (return char*). just delete it.
 
 CFLAGS= -g
-CC= cc 			# won't work on sunOS. need ANSI C prototypes support.
-#CC= gcc 
+CC= cc                  # won't work on sunOS. need ANSI C prototypes support.
+#CC= gcc
 YACC=yacc
-RANLIB=ranlib		# for BSD-derived systems
+RANLIB=ranlib           # for BSD-derived systems
 
-#CC = gcc -U__GNUC__	#ONLY if you get __eprintf undefined (assert.h problem)
-#RANLIB=echo		# for System V, there is no 'ranlib' 
+#CC = gcc -U__GNUC__    #ONLY if you get __eprintf undefined (assert.h problem)
+#RANLIB=echo            # for System V, there is no 'ranlib'
 
 OBJ= duel.o types.o eval.o misc.o y.tab.o error.o evalops.o print.o output.o
 
-all:	duel.a duelself
+all:    duel.a duelself
 
 duelself: duel.a duelself.o
 	$(CC) duelself.o duel.a -o duelself
@@ -37,7 +37,7 @@ clean:
 	rm -f $(OBJ) y.tab.c duelself.o duelself duel.a
 
 
-test:	duelself
+test:   duelself
 	duelself <tsuite.self >self.out
 	@echo NOTE: diffs of the @xxxx values are ok
 	diff tsuite.self.out self.out

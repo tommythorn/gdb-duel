@@ -7,40 +7,40 @@
  */
 
 /*
- * $Log:	duel.c,v $
+ * $Log:        duel.c,v $
  * Revision 1.11  93/03/13  04:03:07  mg
  * moved VERSION to patchlevel.h
- * 
+ *
  * Revision 1.10  93/03/12  05:41:54  mg
  * Version 1.10 - support (x)y cast, piped output.
- * 
+ *
  * Revision 1.9  93/02/23  19:09:35  mg
  * new version 1.02 release (support gdb4.8)
- * 
+ *
  * Revision 1.8  93/02/03  21:56:33  mg
  * version 1.01
- * 
+ *
  * Revision 1.7  93/01/12  21:28:44  mg
  * cleanup and set for release
- * 
+ *
  * Revision 1.6  93/01/06  23:57:10  mg
  * added alias, clear commands, new memory alloc/release
- * 
+ *
  * Revision 1.5  93/01/03  07:26:47  mg
  * new printing setup
- * 
+ *
  * Revision 1.4  92/12/24  23:32:38  mg
  * better struct support, misc changes
- * 
+ *
  * Revision 1.3  92/10/19  15:02:04  mg
  * lcc happy, size zero arrays
- * 
+ *
  * Revision 1.2  92/10/14  02:03:15  mg
  * misc
- * 
+ *
  */
 
-#include <setjmp.h>     
+#include <setjmp.h>
 #define DEF             /* define global variables */
 #include "duel.h"
 #include "patchlevel.h"
@@ -130,7 +130,7 @@ x..y    x, x+1, x+2 .. y. (if x>y, return them backwards)          x[10..20]\n\
 x..     like x..maxint. Caution: use only with x@y or x[[y]]     name[0..]@0\n\
 x>?y    x if x>y else nothing. also <? <=? >=? ==? and !=?        x[..10]<?0\n\
 &&/x    1 or 0 if x!=0 for all x values. ||/x similar         &&/x[..100]>=0\n\
-x,y     x, then y.				      head-->next->(val,key)\n\
+x,y     x, then y.                                    head-->next->(val,key)\n\
 x=>y    eval y for each x, setting '_' to x's values            x[..50]=>_*_\n\
 if(x) y C statements are operators. Also for(), while(), if() else\n\
 x;y     Evaluate and ignore x's value, then return y\n");
@@ -142,11 +142,11 @@ void duel_parse_and_eval(char *s)
 {
    static first=1 ;
    if(first)  {                 /* init stuff */
-      duel_init_basic_ctypes(); 
+      duel_init_basic_ctypes();
       duel_printf("%s.%d, public domain debugging language. \"dl\" for help\n",
                VERSION,PATCHLEVEL);
       duel_redirectable_output_init();
-      first=0 ; 
+      first=0 ;
    }
    if(!s || *s==0) {  /* no input, give some help */
        duel_printf("\
@@ -186,26 +186,16 @@ duel clear    - clear all aliases\n\n");
    }
    if(setjmp(duel_abort_jmp)==0) {              /* set abort point */
      if((root=duel_parse(s))!=NULL) {
-       tvalue v ; 
-       duel_set_input_string(s);	  /* for src-location err management */
+       tvalue v ;
+       duel_set_input_string(s);          /* for src-location err management */
        duel_reset_eval();
        duel_redirectable_output_start(s); /* allow eval output to go to pipe */
        while(duel_eval(root,&v)) {
            duel_print_value(&v);
-	   duel_flush();
+           duel_flush();
        }
        duel_redirectable_output_end();
      }
    }
    duel_cleanup();
 }
-
-
-
-
-
-
-
-
-
-
