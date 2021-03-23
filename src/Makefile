@@ -11,7 +11,7 @@
 # Also for sunOS4.x, yacc inserts a declaration of malloc() at the first line
 # of y.tab.c, which is WRONG (return char*). just delete it.
 
-CFLAGS= -g
+CFLAGS= -g -Wall -Werror -Wno-parentheses
 CC= cc                  # won't work on sunOS. need ANSI C prototypes support.
 #CC= gcc
 YACC=yacc
@@ -28,7 +28,7 @@ duelself: duel.a duelself.o
 	$(CC) duelself.o duel.a -o duelself
 
 duel.a:  $(OBJ)
-	ar ru duel.a $(OBJ)
+	ar r duel.a $(OBJ)
 	$(RANLIB) duel.a
 
 y.tab.c: parse.y

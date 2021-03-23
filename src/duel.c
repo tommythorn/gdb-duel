@@ -140,7 +140,7 @@ x;y     Evaluate and ignore x's value, then return y\n");
 
 void duel_parse_and_eval(char *s)
 {
-   static first=1 ;
+   static int first = 1 ;
    if(first)  {                 /* init stuff */
       duel_init_basic_ctypes();
       duel_printf("%s.%d, public domain debugging language. \"dl\" for help\n",

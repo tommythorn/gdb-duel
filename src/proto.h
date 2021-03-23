@@ -57,7 +57,7 @@ PROC duel_find_func_frame(tvalue *v,char *op);
 
 /* output management */
 
-PROC duel_printf();	/* old style, becuase of vararg and Unix */
+PROC duel_printf(char *fmt, ...);
 PROC duel_flush(void);
 PROC duel_redirectable_output_start(char *);
 PROC duel_redirectable_output_end(void);

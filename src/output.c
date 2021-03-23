@@ -9,7 +9,7 @@
  * support piped i/o is still an alpha version.
  */
 
-#include <varargs.h>  /* for duel_printf */
+#include <stdarg.h> /* for duel_printf */
 #include "duel.h"
 
 /* output functions:
@@ -17,14 +17,10 @@
  * duel_flush     used by duel to flush the output.
  */
 
-PROC duel_printf(va_alist)      /* like printf, but for duel output */
-va_dcl
+PROC duel_printf(char *fmt, ...)      /* like printf, but for duel output */
 {
   va_list args;
-  char *fmt ;
-  va_start(args);
-  fmt=va_arg(args,char *);
-  vfprintf(stdout,fmt,args);
+  vfprintf(stdout, fmt, args);
 }
 
 PROC duel_flush(void)   /* flush out output from duel */

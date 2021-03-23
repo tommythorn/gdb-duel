@@ -105,7 +105,7 @@ LFUNC tctype_kind get_storage_type_kind(tctype *t)
  * chicken&egg problem of error reporting.)
  */
 
-FUNC duel_try_get_rvalue(tvalue *v,char *op)
+FUNC int duel_try_get_rvalue(tvalue *v,char *op)
 {
    void *p ;
    int n ;
