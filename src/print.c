@@ -40,6 +40,7 @@
  */
 
 #include "duel.h"
+#include "stdio.h"
 
 /* print type information (no new lines)
  * parm 'expand' controls expansion level for structs & unions. normally 1.
@@ -141,7 +142,6 @@ char *neat_char(char c,char quote)
 
 PROC duel_sprint_scalar_value(char *s,tvalue *v)
 {
-   bool ok ;
    tvalue rval ;  /* copy of v, but as an rval */
    rval = *v ;
    if(v->val_kind==VK_FVALUE) {
@@ -167,15 +167,16 @@ PROC duel_sprint_scalar_value(char *s,tvalue *v)
                 sprintf(s,"array @%p%s",v->u.lvalue,m);
                 return;
              }
+          default:
+            ;
         }
         /* convert scalar type to rvalue */
         if(!duel_try_get_rvalue(&rval,"")) {
-           sprintf(s,"ref @%p [ILLEGAL]",v->u.lvalue,m);
+           sprintf(s,"ref @%p [ILLEGAL]",v->u.lvalue);
            return ;
         }
    }
-   else
-   if(v->val_kind==VK_BVALUE) {
+   else if(v->val_kind==VK_BVALUE) {
         if(!duel_try_get_rvalue(&rval,"")) {
            sprintf(s,"ref @%p [ILLEGAL]",v->u.bvalue.lvalue);
            return ;
@@ -188,16 +189,21 @@ PROC duel_sprint_scalar_value(char *s,tvalue *v)
       case CTK_SHORT:   sprintf(s,"%d",     rval.u.rval_short)  ; break ;
       case CTK_INT:     sprintf(s,"%d",     rval.u.rval_int)    ; break ;
       case CTK_LONG:    sprintf(s,"%ldL",   rval.u.rval_long)   ; break ;
-      case CTK_SCHAR:   if(rval.u.rval_schar==0) sprintf(s,"'\\0'");
-                        else sprintf(s,"%d", rval.u.rval_schar)  ; break ;
+      case CTK_SCHAR:   if (rval.u.rval_schar==0) sprintf(s,"'\\0'");
+                        else sprintf(s,"%d", rval.u.rval_schar)  ;
+                        break ;
       case CTK_UCHAR:   if(rval.u.rval_uchar==0) sprintf(s,"'\\0'");
-                        else sprintf(s,"'\\x%d'", rval.u.rval_uchar)  ; break ;
+                        else sprintf(s,"'\\x%d'", rval.u.rval_uchar)  ;
+                        break ;
       case CTK_USHORT:  if(rval.u.rval_ushort==0) sprintf(s,"0");
-                        else sprintf(s,"0x%x",   rval.u.rval_ushort) ; break ;
+                        else sprintf(s,"0x%x",   rval.u.rval_ushort) ;
+                        break ;
       case CTK_UINT:    if(rval.u.rval_uint==0) sprintf(s,"0");
-                        else sprintf(s,"0x%x",   rval.u.rval_uint)   ; break ;
+                        else sprintf(s,"0x%x",   rval.u.rval_uint)   ;
+                        break ;
       case CTK_ULONG:   if(rval.u.rval_ulong==0L) sprintf(s,"0");
-                        else sprintf(s,"0x%lxL", rval.u.rval_ulong)  ; break ;
+                        else sprintf(s,"0x%lxL", rval.u.rval_ulong)  ;
+                        break ;
       case CTK_FLOAT:   rval.u.rval_double=rval.u.rval_float ;
       case CTK_DOUBLE:  { double x=rval.u.rval_double ;
                           if(x >= -1e-6 && x <= 1e-6 || x >= 1e8 || x <= -1e8)
@@ -269,7 +275,7 @@ PROC duel_print_value(tvalue *v)
 
    duel_sprint_scalar_value(s,v);
    if(v->val_kind==VK_LVALUE && strstr(s,"ILLEGAL")==NULL) {
-      switch(t->type_kind) {
+      switch((unsigned)t->type_kind) {
         case CTK_UNION:
         case CTK_STRUCT:
              duel_printf(topipe? "$$$VAL: { " : " = { ");

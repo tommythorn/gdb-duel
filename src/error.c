@@ -104,7 +104,7 @@ PROC duel_gen_error(char *mesg,char *arg1)
 
 /* handle fatal messages */
 
-PROC duel_fatal(char *msg)
+PROC __attribute__((noreturn)) duel_fatal(char *msg)
 {
    duel_redirectable_output_abort();
    duel_printf("Fatal Duel error: %s\n",msg);

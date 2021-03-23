@@ -6,10 +6,10 @@ GDB 4.8, Copyright 1993 Free Software Foundation, Inc.
  Breakpoint 1 at 0x400518: file tsuite.c, line 60.
  Note: breakpoint 1 also set at pc 0x400518.
 Breakpoint 2 at 0x400518: file tsuite.c, line 61.
- Starting program: /tmp_mnt/n/fs/grad2/mg/duel/tsuite/tsuite 
+ Starting program: /tmp_mnt/n/fs/grad2/mg/duel/tsuite/tsuite
 
 Breakpoint 1, main () at tsuite.c:61
-61	    printf("trivial tsuite program\n");
+61          printf("trivial tsuite program\n");
   DUEL 1.10.4, public domain debugging language. "dl" for help
 1*2 = 2
 1*(2/3) = 0.66666667
@@ -49,7 +49,7 @@ y[2] = 0
 8
 9
 10
-x is: 402, 443, 486, 531, 578, 627, 678, 731, 786, 843, 902, 963, 1026, 1091, 1158, 1227, 1298, 1371, 1446, 1523, 1602, 
+x is: 402, 443, 486, 531, 578, 627, 678, 731, 786, 843, 902, 963, 1026, 1091, 1158, 1227, 1298, 1371, 1446, 1523, 1602,
  x[37]=1371
 x[38]=1446
 x[39]=1523
@@ -61,20 +61,20 @@ x[40]=1602
 ^ Invalid float constant.
  Error:   i=4 ;
          -^-- operand x is not an lvalue for operator 'x=y'
-operand ``i'' 	-- type: int 
-		-- value: 40
+operand ``i''   -- type: int
+                -- value: 40
  Error:   x=6 ;
          -^-- bad operand x type for operator 'x=y'
-operand ``x'' 	-- type: int [100] 
-		-- value: array @1001f000
+operand ``x''   -- type: int [100]
+                -- value: array @1001f000
  Error:   x++ ;
          -^-- operand x of '++' is not integral
-operand ``x'' 	-- type: int [100] 
-		-- value: array @1001f000
+operand ``x''   -- type: int [100]
+                -- value: array @1001f000
  Error:   --i ;
          ^-- operand of '--' must be an lvalue
-operand ``i'' 	-- type: int 
-		-- value: 40
+operand ``i''   -- type: int
+                -- value: 40
   Aliases table:
 p:  p = @10020020
 j:  j = 100
@@ -121,38 +121,38 @@ s[11] = '\0'
  -1 = 0xffffffff
   Error:   frame(0).gint
          --------^-- field not found in operator '.'
-operand ``frame(0)'' 	-- type: int 
-		-- value: frame(0)
+operand ``frame(0)''    -- type: int
+                -- value: frame(0)
  frame(0).(gint)
 ---------------^ syntax error
  Error:   frame(0).ha
          --------^-- field not found in operator '.'
-operand ``frame(0)'' 	-- type: int 
-		-- value: frame(0)
+operand ``frame(0)''    -- type: int
+                -- value: frame(0)
  Error:   sizeof(uint)
          -------^-- variable 'uint' not found
  sizeof gint
 -----------^ syntax error
  Error:   main == printf
          -----^-- incompatible types for op ==
-operand1 ``main'' 	-- type: ptr to func returning void 
-		-- value: @004001f0
-operand2 ``printf'' 	-- type: ptr to func returning int 
-		-- value: @00400ca0
+operand1 ``main''       -- type: ptr to func returning void
+                -- value: @004001f0
+operand2 ``printf''     -- type: ptr to func returning int
+                -- value: @00400ca0
  Error:   main+1
          ----^-- unknown pointer object size for '+' op
-operand ``main'' 	-- type: ptr to func returning void 
-		-- value: @004001f0
+operand ``main''        -- type: ptr to func returning void
+                -- value: @004001f0
  Error:   main > printf
          -----^-- incompatible types for op >
-operand1 ``main'' 	-- type: ptr to func returning void 
-		-- value: @004001f0
-operand2 ``printf'' 	-- type: ptr to func returning int 
-		-- value: @00400ca0
+operand1 ``main''       -- type: ptr to func returning void
+                -- value: @004001f0
+operand2 ``printf''     -- type: ptr to func returning int
+                -- value: @00400ca0
  Error:   printf+3
          ------^-- unknown pointer object size for '+' op
-operand ``printf'' 	-- type: ptr to func returning int 
-		-- value: @00400ca0
+operand ``printf''      -- type: ptr to func returning int
+                -- value: @00400ca0
  T int x
 -----^ syntax error
  uint y
@@ -278,16 +278,15 @@ root-->right[[5]]-->left[[4]]-->right[[3]]->left->right->left->right->(left->cod
 2
   Error:   emp[0]=us
          ------^-- incompatible types for op x=y
-operand1 ``emp[0]'' 	-- type: struct .F13 { int a ; int b ; char * name ; } ; 
-		-- value: struct @10001510
-operand2 ``us'' 	-- type: enum .F14 
-		-- value: DAVE
+operand1 ``emp[0]''     -- type: struct .F13 { int a ; int b ; char * name ; } ;
+                -- value: struct @10001510
+operand2 ``us''         -- type: enum .F14
+                -- value: DAVE
  Error:   emp=us
          ---^-- bad operand x type for operator 'x=y'
-operand ``emp'' 	-- type: array [100] of struct .F13 { int a ; int b ; char * name ; } ; 
-		-- value: array @10001510
+operand ``emp''         -- type: array [100] of struct .F13 { int a ; int b ; char * name ; } ;
+                -- value: array @10001510
  Error:   us=emp
          --^-- operand x of 'y=x' is not numeric
-operand ``emp'' 	-- type: array [100] of struct .F13 { int a ; int b ; char * name ; } ; 
-		-- value: array @10001510
-  
+operand ``emp''         -- type: array [100] of struct .F13 { int a ; int b ; char * name ; } ;
+                -- value: array @10001510

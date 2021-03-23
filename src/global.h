@@ -45,6 +45,7 @@
  *
  */
 
+#include <stdint.h>
 
 /* The following definitions are common programming tricks that I use
  * in every program I write. I hope they are obvious. the FUNC/PROC
@@ -264,12 +265,7 @@ DEF tctype *ctype_int,  *ctype_uint, *ctype_short, *ctype_ushort,
 #define VALUE_MAX_CONST_SIZE        8
 #define VALUE_MAX_SYMBOLIC_SIZE     128
 
-typedef int tptrsize_int ;      /* type so that
-                                   tptrsize x; char *p ;
-                                   p == (char*) (tptrsize) p
-                                 */
-
-  /* type that represent a target address space location.  */
+/* type that represent a target address space location.  */
 
 typedef char* ttarget_ptr ; /* pointer to target's address */
 

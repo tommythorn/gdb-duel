@@ -440,7 +440,7 @@ LFUNC bool duel_eval_sbin(tnode *n,tvalue *v)
 #define lev n->eval.level
 
    duel_assert(n->node_kind==NK_OP && n->op_kind==OPK_SBIN);
-   switch(n->op) {
+   switch ((unsigned) n->op) {
    case OP_DECL:
            duel_assert(kid0->node_kind==NK_NAME && kid1->node_kind==NK_CTYPE);
            if(kid1->ctype->size<=0) duel_gen_error("illegal type size",0);
@@ -640,7 +640,7 @@ LFUNC bool duel_eval_tri(tnode *n,tvalue *v)
 {
 #define lev n->eval.level
    duel_assert(n->node_kind==NK_OP && n->op_kind==OPK_TRI);
-   switch(n->op) {
+   switch((unsigned)n->op) {
    case OP_IF:  /* if(a) b else c return eval(b) for each eval(a)!=0
                  * and eval(c) for each eval(a)==0 (usu. (a) is one result*/
              if(lev>1) goto if2;

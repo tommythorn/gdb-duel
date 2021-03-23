@@ -619,7 +619,6 @@ LFUNC char parse_escaped_char(void)
 {
   char retc ;
   switch(lexptr[0]) {
-   /*case 'a': retc='\a' ; break ;      /* some compilers don't support it. */
    case 'b': retc='\b' ; break ;
    case 'f': retc='\f' ; break ;
    case 'n': retc='\n' ; break ;

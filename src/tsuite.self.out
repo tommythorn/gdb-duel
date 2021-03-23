@@ -4,9 +4,9 @@ dl> ##   Written by Michael Golan mg@cs.princeton.edu
 dl> 
 dl> ##
 dl> ## test suite for duel, can be used with duelself or gdb
-dl> ## 
+dl> ##
 dl> 
-dl> ## check constants 
+dl> ## check constants
 dl> (1..5)*(2,(double) 2/3)
 DUEL 1.10.4, public domain debugging language. "dl" for help
 1*2 = 2
@@ -22,7 +22,7 @@ DUEL 1.10.4, public domain debugging language. "dl" for help
 dl> 
 dl> ## declare array x, set it, search it
 dl> 
-dl> int x[100] ; 
+dl> int x[100] ;
 dl> x[0..99]= -1 ;
 dl> x[i:=20..40]=2+i*i ;
 dl> x[20..23,38..40]
@@ -33,7 +33,7 @@ x[23] = 531
 x[38] = 1446
 x[39] = 1523
 x[40] = 1602
-dl> x[..100] >=? 33*33 <=? 35*35 
+dl> x[..100] >=? 33*33 <=? 35*35
 x[33] = 1091
 x[34] = 1158
 dl> x[..100]=> ((_>=33*33) & (_<= 35*35)) ==? 1
@@ -46,13 +46,13 @@ x+5 = @10014014
 dl> *(x+7..9)++
 Error:   *(x+7..9)++
          -----^-- operand x of 'x..y' is not integral
-operand ``x+7'' 	-- type: int * 
-		-- value: @1001401c
+operand ``x+7''         -- type: int *
+                -- value: @1001401c
 dl> *(x+(7..9))++
 Error:   *(x+(7..9))++
          -----------^-- operand of '++' must be an lvalue
-operand ``(x+7)'' 	-- type: int * 
-		-- value: @1001401c
+operand ``(x+7)''       -- type: int *
+                -- value: @1001401c
 dl> (*(x+(7..9)))++
 (*(x+7))++ = -1
 (*(x+8))++ = -1
@@ -70,7 +70,7 @@ dl> (x[..99]>?0)@(_>500)
 (x[22]) = 486
 dl> 
 dl> printf("x is: "); printf("%d, ",x[0..99]>? 0); printf("\n");
-x is: 402, 443, 486, 531, 578, 627, 678, 731, 786, 843, 902, 963, 1026, 1091, 1158, 1227, 1298, 1371, 1446, 1523, 1602, 
+x is: 402, 443, 486, 531, 578, 627, 678, 731, 786, 843, 902, 963, 1026, 1091, 1158, 1227, 1298, 1371, 1446, 1523, 1602,
 dl> int j ; for(j=0 ; j<100 ; j++) if(x[j]>37*37) printf("x[%d]=%d\n",j,x[j]);
 x[37]=1371
 x[38]=1446
@@ -78,11 +78,11 @@ x[39]=1523
 x[40]=1602
 dl> 
 dl> printf("%d, ",1..5); printf("\n");
-1, 2, 3, 4, 5, 
+1, 2, 3, 4, 5,
 dl> 
 dl> ## check void type
 dl> void *p
-dl> p = &p 
+dl> p = &p
 &p = @10012138
 dl> p,*p
 p = @10012138
@@ -96,28 +96,28 @@ dl> 1e++4
 dl> & &x
 Error:   & &x
          ^-- operand x of '&x' is not a lvalue
-operand ``&x'' 	-- type: ptr to int [100] 
-		-- value: @10014000
+operand ``&x''  -- type: ptr to int [100]
+                -- value: @10014000
 dl> i=4 ;
 Error:   i=4 ;
          -^-- operand x is not an lvalue for operator 'x=y'
-operand ``i'' 	-- type: int 
-		-- value: 40
+operand ``i''   -- type: int
+                -- value: 40
 dl> x=6 ;
 Error:   x=6 ;
          -^-- bad operand x type for operator 'x=y'
-operand ``x'' 	-- type: int [100] 
-		-- value: array @10014000
+operand ``x''   -- type: int [100]
+                -- value: array @10014000
 dl> x++ ;
 Error:   x++ ;
          -^-- operand x of '++' is not integral
-operand ``x'' 	-- type: int [100] 
-		-- value: array @10014000
+operand ``x''   -- type: int [100]
+                -- value: array @10014000
 dl> --i ;
 Error:   --i ;
          ^-- operand of '--' must be an lvalue
-operand ``i'' 	-- type: int 
-		-- value: 40
+operand ``i''   -- type: int
+                -- value: 40
 dl> 
 dl> ## cleanup
 dl> 
@@ -154,17 +154,17 @@ s[9] = 'n'
 s[10] = 'g'
 s[11] = '\0'
 dl> 
-dl> gint 
+dl> gint
 gint = 0
 dl> gint++
 gint++ = 0
 dl> gint++
 gint++ = 1
-dl> --gint 
+dl> --gint
 gint = 1
-dl> gint 
+dl> gint
 gint = 1
-dl> main.s 
+dl> main.s
 main.s = "main string"
 dl> main.s++
 main.s++ = "main string"
@@ -189,14 +189,14 @@ dl> ## gint is a global, not local fro main in frame 0
 dl> frame(0).gint
 Error:   frame(0).gint
          --------^-- field not found in operator '.'
-operand ``frame(0)'' 	-- type: int 
-		-- value: frame(0)
+operand ``frame(0)''    -- type: int
+                -- value: frame(0)
 dl> ## but when we eval (expr) under frame 0 scope, we find it ok.
 dl> frame(0).(gint)
 frame(0).(gint)
 ---------------^ syntax error
 dl> 
-dl> T uint myuint ; myuint = -1 
+dl> T uint myuint ; myuint = -1
 -1 = 0xffffffff
 dl> 
 dl> sizeof(int)
@@ -212,39 +212,39 @@ sizeof()
 --------^ syntax error
 dl> sizeof(gint)
 sizeof(gint) = 0x4
-dl> sizeof gint 
-sizeof gint 
+dl> sizeof gint
+sizeof gint
 -----------^ syntax error
 dl> sizeof gint+1
 sizeof gint+1
 -----------^ syntax error
-dl> ## some errors 
+dl> ## some errors
 dl> 
 dl> main == main
 main==main = 1
 dl> main == printf
 Error:   main == printf
          -----^-- incompatible types for op ==
-operand1 ``main'' 	-- type: ptr to func returning void 
-		-- value: @00400918
-operand2 ``printf'' 	-- type: ptr to func returning int 
-		-- value: @004112b0
+operand1 ``main''       -- type: ptr to func returning void
+                -- value: @00400918
+operand2 ``printf''     -- type: ptr to func returning int
+                -- value: @004112b0
 dl> 
 dl> main+1
 Error:   main+1
          ----^-- unknown pointer object size for '+' op
-operand ``main'' 	-- type: ptr to func returning void 
-		-- value: @00400918
+operand ``main''        -- type: ptr to func returning void
+                -- value: @00400918
 dl> malloc[4]
 Error:   malloc[4]
          ------^-- unknown pointer object size for '+' op
-operand ``malloc'' 	-- type: ptr to func returning void * 
-		-- value: @00411310
+operand ``malloc''      -- type: ptr to func returning void *
+                -- value: @00411310
 dl> printf+3
 Error:   printf+3
          ------^-- unknown pointer object size for '+' op
-operand ``printf'' 	-- type: ptr to func returning int 
-		-- value: @004112b0
+operand ``printf''      -- type: ptr to func returning int
+                -- value: @004112b0
 dl> 
 dl> T int x
 T int x
@@ -256,7 +256,7 @@ uint y
 dl> T uint y = 5
 T uint y = 5
 ----------^ syntax error
-dl> T uint y 
+dl> T uint y
 dl> 
 dl> ## the end
 dl> 

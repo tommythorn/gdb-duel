@@ -23,11 +23,12 @@ PROC duel_print_type(tctype *t,int expand);
 PROC duel_sprint_scalar_value(char *s,tvalue *v);
 
 
-PROC duel_fatal(char *msg);
-PROC duel_abort(void);
+PROC __attribute__((noreturn)) duel_fatal(char *msg);
+PROC __attribute__((noreturn)) duel_abort(void);
 PROC duel_cleanup(void);
 
 FUNC tnode* duel_parse(char *s);
+PROC duel_parse_and_eval(char *s);
 
 
 PROC duel_reset_eval(void);

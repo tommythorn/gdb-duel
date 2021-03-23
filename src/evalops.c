@@ -292,7 +292,7 @@ LFUNC tctype* find_numeric_result_type(tvalue *v1,tvalue *v2,
       case CTK_ULONG:   w v->u.rval_ulong    ; break ; \
       case CTK_FLOAT:   w v->u.rval_float    ; break ; \
       case CTK_DOUBLE:  w v->u.rval_double   ; break ; \
-      case CTK_PTR:     w (tptrsize_int) v->u.rval_ptr ; break ; \
+      case CTK_PTR:     w (intptr_t) v->u.rval_ptr ; break ; \
       default: duel_assert(0);                         \
    }
 
@@ -318,7 +318,7 @@ LPROC convert_scalar_type(tvalue *v,tctype *t,char *op)
       case CTK_FLOAT:  convert_to_fix(v,v->u.rval_float=(float))    ; break ;
       case CTK_DOUBLE: convert_to_fix(v,v->u.rval_double=(double))  ; break ;
       case CTK_PTR:    convert_to_fix(v,
-                        v->u.rval_ptr=(ttarget_ptr)(tptrsize_int)) ; break ;
+                        v->u.rval_ptr=(ttarget_ptr)(intptr_t)) ; break ;
       default: duel_assert(0);
    }
    v->ctype=t ;
@@ -658,6 +658,8 @@ LFUNC bool do_compare_questionmark(topcode op,tvalue *v1,tvalue *v2,tvalue *r)
      case OP_LEQ: do_op_le(v1,v2,r); break ;
      case OP_LSQ: do_op_ls(v1,v2,r); break ;
      case OP_GTQ: do_op_gt(v1,v2,r); break ;
+     default:
+         ;
    }
    if(r->u.rval_int==0) return FALSE ;
    *r=tmp ;
@@ -1156,7 +1158,7 @@ PROC duel_do_cast(tctype *tout,tvalue *v)
 
 PROC duel_apply_unary_op(topcode op,tvalue *v)
 {
-   switch(op) {
+   switch((unsigned)op) {
       case '(':  do_op_parenthesis(v);            break ;
       case '{':  duel_sprint_scalar_value(v->symb_val,v);break ;
       case '-':  do_op_minus(v);                  break ;
@@ -1192,7 +1194,7 @@ PROC duel_apply_post_unary_op(topcode op,tvalue *v)
 
 FUNC bool duel_apply_bin_op(topcode op,tvalue *v1,tvalue *v2,tvalue *r)
 {
-  switch(op) {
+  switch((unsigned)op) {
    case '[': do_op_index(v1,v2,r); break ;
    case '+':  do_op_add(v1,v2,r);      break ;
    case '-':  do_op_subtract(v1,v2,r); break ;

@@ -38,6 +38,6 @@ clean:
 
 
 test:   duelself
-	duelself <tsuite.self >self.out
+	./duelself <tsuite.self >self.out
 	@echo NOTE: diffs of the @xxxx values are ok
-	diff tsuite.self.out self.out
+	diff -u tsuite.self.out self.out

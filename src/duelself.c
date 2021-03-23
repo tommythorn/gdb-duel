@@ -87,21 +87,23 @@ FUNC bool duel_get_target_bitfield(ttarget_ptr struct_at,int bitpos,
 }
 
 /* make a function call to the target. */
-/* support only passing/returing sizeof(int) upto 5 paramaters */
+/* support only passing/returing sizeof(int) upto 5 parameters */
 PROC duel_target_func_call(tvalue *func, tvalue *parms[],
                             int parms_no,tvalue *rval)
 {
-    int (*f)();
-    int i ;
-    if(parms_no>5) duel_fatal("too many parms");
-    if(sizeof(func->ctype->u.kid)!=sizeof(int) &&
-       func->ctype->u.kid!=ctype_void ) duel_fatal("unsupported func parm");
-    for(i=0 ; i<parms_no ; i++) {
-        if(parms[i]->val_kind!=VK_RVALUE || parms[i]->ctype->size!=sizeof(int))
-            duel_fatal("unsupported paramater");
+    if (parms_no > 5)
+        duel_fatal("too many parms");
+
+    if (sizeof func->ctype->u.kid != sizeof(intptr_t) && func->ctype->u.kid != ctype_void)
+        duel_fatal("unsupported func parm");
+
+    for (int i = 0; i < parms_no; ++i) {
+        if (parms[i]->val_kind != VK_RVALUE || parms[i]->ctype->size != sizeof(int))
+            duel_fatal("unsupported parameter");
     }
-    f=(int (*)()) func->u.lvalue ;
-    switch(parms_no) {
+
+    int (*f)() = (int (*)()) func->u.lvalue;
+    switch (parms_no) {
       case 0:
         rval->u.rval_int= (*f)();
       break ;
@@ -155,7 +157,6 @@ FUNC bool duel_get_target_variable(char *name, int frame_no, tvalue *v)
        return TRUE ;
    }
    if(strcmp(name,"printf")==0) {
-       if(0) printf("");  /* "declare" print */
        v->ctype=duel_mkctype_func(ctype_int);
        v->u.lvalue = (void*) printf ;
        return TRUE ;
@@ -196,7 +197,11 @@ int main(int argc,char **argv)
 
    while(1) {
        char in[120] ;
-       gets(in);
+       fgets(in, sizeof in, stdin);
+       // Code seems to assume trailing \n gets stripped
+       if (in[strlen(in)-1] == '\n')
+           in[strlen(in)-1] = 0;
+
        if(feof(stdin)) break ;
         /* output & input are RCS'ed. avoid $Header in self.out, which is
          * the input header, which RCS fix... which create mis matches */
